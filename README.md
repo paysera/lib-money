@@ -1,4 +1,4 @@
-PHP Library for Operations with Money
+PHP Library for Operations with Money [![Build Status](https://travis-ci.org/paysera/lib-money.svg?branch=master)](https://travis-ci.org/paysera/lib-money)
 ====
 
 Instead of storing prices, profit and any other amount of money in float or integer variable, use Money value object
