@@ -86,7 +86,7 @@ class MoneyNormalizer implements NormalizerInterface, DenormalizerInterface
         }
 
         return array(
-            'amount'   => $entity->getAmount(),
+            'amount'   => $entity->formatAmount(),
             'currency' => $entity->getCurrency(),
         );
     }
