@@ -189,6 +189,7 @@ class CurrencyIsoNumber
         '962' => 'XPT',
         '961' => 'XAG',
         '933' => 'BYN',
+        '928' => 'VES',
     );
 
     /**
