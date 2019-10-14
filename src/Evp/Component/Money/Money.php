@@ -162,6 +162,7 @@ class Money implements MoneyInterface
         'UYU' => 2,
         'UZS' => 2,
         'VEF' => 2,
+        'VES' => 2,
         'VND' => 0,
         'VUV' => 0,
         'WST' => 2,
