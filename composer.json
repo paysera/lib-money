@@ -15,7 +15,7 @@
         }
     },
     "require": {
-        "maba/monetary": "^0.9"
+        "maba/monetary": "^0.9.3"
     },
     "require-dev": {
         "phpunit/phpunit": "~4.8"
