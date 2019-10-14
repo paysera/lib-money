@@ -173,6 +173,7 @@ class Money implements MoneyInterface
         'ZAR' => 2,
         'ZMW' => 0,
         'ZWL' => 2,
+        'VES' => 2,
     );
 
     /**
