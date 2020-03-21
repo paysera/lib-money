@@ -2,6 +2,8 @@
 
 namespace Evp\Component\Money;
 
-class MoneyException extends \Exception
+use InvalidArgumentException;
+
+class MoneyException extends InvalidArgumentException
 {
 }

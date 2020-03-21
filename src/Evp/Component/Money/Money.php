@@ -174,6 +174,10 @@ class Money implements MoneyInterface
         'ZAR' => 2,
         'ZMW' => 0,
         'ZWL' => 2,
+
+        'XAU' => 6,
+        'XAG' => 4,
+        'XPT' => 6,
     );
 
     /**
@@ -209,7 +213,7 @@ class Money implements MoneyInterface
      *
      * @return static
      *
-     * @throws \InvalidArgumentException
+     * @throws MoneyException
      */
     public function setAmount($amount)
     {
@@ -218,11 +222,11 @@ class Money implements MoneyInterface
         } else {
             $amount = str_replace(',', '.', $amount);
             if (substr_count($amount, '.') > 1) {
-                throw new \InvalidArgumentException('Invalid amount: ' . $amount);
+                throw new MoneyException('Invalid amount: ' . $amount);
             }
 
             if (!preg_match('/^[-+]?\d+(\.\d+)?$/', $amount)) {
-                throw new \InvalidArgumentException('Amount has invalid chars: ' . $amount);
+                throw new MoneyException('Amount has invalid chars: ' . $amount);
             }
 
             $amount = preg_replace('/^([-+]?)0+(\d)/', '$1$2', $amount);
@@ -242,12 +246,12 @@ class Money implements MoneyInterface
      *
      * @return static
      *
-     * @throws \InvalidArgumentException
+     * @throws MoneyException
      */
     protected function setAmountInCents($amountInCents)
     {
         if (!preg_match('/^-?\d+$/', $amountInCents)) {
-            throw new \InvalidArgumentException('Amount must be integer');
+            throw new MoneyException('Amount must be integer');
         }
 
         $amount = $this->getMath()->div((string)$amountInCents, '100');
@@ -314,7 +318,7 @@ class Money implements MoneyInterface
      *
      * @return string
      *
-     * @throws \InvalidArgumentException
+     * @throws MoneyException
      */
     public function formatAmount($fraction = null, $decimalSeperator = '.', $thousandsSeperator = null)
     {
@@ -355,14 +359,14 @@ class Money implements MoneyInterface
      *
      * @return $this
      *
-     * @throws \InvalidArgumentException
+     * @throws MoneyException
      */
     public function setCurrency($currency)
     {
         $currency = strtoupper($currency);
 
         if (!isset(static::$fractions[$currency])) {
-            throw new \InvalidArgumentException(sprintf('Unsupported currency: %s', $currency));
+            throw new MoneyException(sprintf('Unsupported currency: %s', $currency));
         }
 
         $this->currency = $currency;
@@ -382,11 +386,11 @@ class Money implements MoneyInterface
     /**
      * Add money
      *
-     * @param \Evp\Component\Money\Money $money
+     * @param Money $money
      *
      * @return static
      *
-     * @throws \Evp\Component\Money\MoneyException
+     * @throws MoneyException
      */
     public function add(Money $money)
     {
@@ -404,11 +408,11 @@ class Money implements MoneyInterface
     /**
      * Sub money
      *
-     * @param \Evp\Component\Money\Money $money
+     * @param Money $money
      *
      * @return static
      *
-     * @throws \Evp\Component\Money\MoneyException
+     * @throws MoneyException
      */
     public function sub(Money $money)
     {
@@ -442,7 +446,7 @@ class Money implements MoneyInterface
      *
      * @return static
      *
-     * @throws \Evp\Component\Money\MoneyException
+     * @throws MoneyException
      */
     public function div($divisor)
     {
@@ -535,11 +539,11 @@ class Money implements MoneyInterface
     /**
      * Is greater
      *
-     * @param \Evp\Component\Money\Money $money
+     * @param Money $money
      *
      * @return boolean
      *
-     * @throws \Evp\Component\Money\MoneyException
+     * @throws MoneyException
      */
     public function isGt(Money $money)
     {
@@ -557,11 +561,11 @@ class Money implements MoneyInterface
     /**
      * Is greater or equal
      *
-     * @param \Evp\Component\Money\Money $money
+     * @param Money $money
      *
      * @return bool
      *
-     * @throws \Evp\Component\Money\MoneyException
+     * @throws MoneyException
      */
     public function isGte(Money $money)
     {
@@ -579,11 +583,11 @@ class Money implements MoneyInterface
     /**
      * Is less
      *
-     * @param \Evp\Component\Money\Money $money
+     * @param Money $money
      *
      * @return boolean
      *
-     * @throws \Evp\Component\Money\MoneyException
+     * @throws MoneyException
      */
     public function isLt(Money $money)
     {
@@ -601,11 +605,11 @@ class Money implements MoneyInterface
     /**
      * Is less or equal
      *
-     * @param \Evp\Component\Money\Money $money
+     * @param Money $money
      *
      * @return boolean
      *
-     * @throws \Evp\Component\Money\MoneyException
+     * @throws MoneyException
      */
     public function isLte(Money $money)
     {
@@ -623,11 +627,11 @@ class Money implements MoneyInterface
     /**
      * Is equal
      *
-     * @param \Evp\Component\Money\Money $money
+     * @param Money $money
      *
      * @return boolean
      *
-     * @throws \Evp\Component\Money\MoneyException
+     * @throws MoneyException
      */
     public function isEqual(Money $money)
     {
@@ -675,7 +679,7 @@ class Money implements MoneyInterface
     /**
      * Is same currency
      *
-     * @param \Evp\Component\Money\Money $money
+     * @param Money $money
      *
      * @return boolean
      */
@@ -733,7 +737,7 @@ class Money implements MoneyInterface
     /**
      * @return string
      *
-     * @throws \InvalidArgumentException
+     * @throws MoneyException
      */
     public function getAsString()
     {
@@ -747,13 +751,13 @@ class Money implements MoneyInterface
      *
      * @return int
      *
-     * @throws \InvalidArgumentException
+     * @throws MoneyException
      */
     static public function getFraction($currency)
     {
         $currency = strtoupper($currency);
         if (!isset(static::$fractions[$currency])) {
-            throw new \InvalidArgumentException(sprintf('Unsupported currency: %s', $currency));
+            throw new MoneyException(sprintf('Unsupported currency: %s', $currency));
         }
         return static::$fractions[$currency];
     }
@@ -858,7 +862,7 @@ class Money implements MoneyInterface
     /**
      * Get BcMath instance
      *
-     * @return \Evp\Component\Money\MathInterface
+     * @return MathInterface
      */
     private static function getMath()
     {
