@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## 3.0.0 - 2020-07-28
 ### Changed
-- Updated `XAU`, `XPT` fractions
+- Updated `XAU` fractions
 
 ## 2.3.1 - 2020-03-21
 ### Changed
