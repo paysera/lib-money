@@ -177,7 +177,7 @@ class Money implements MoneyInterface
 
         'XAU' => 5,
         'XAG' => 4,
-        'XPT' => 5,
+        'XPT' => 6,
     );
 
     /**
