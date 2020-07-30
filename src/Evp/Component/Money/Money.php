@@ -175,7 +175,7 @@ class Money implements MoneyInterface
         'ZMW' => 0,
         'ZWL' => 2,
 
-        'XAU' => 6,
+        'XAU' => 5,
         'XAG' => 4,
         'XPT' => 6,
     );
