@@ -856,7 +856,7 @@ class Money implements MoneyInterface
         } else {
             $end = '';
         }
-        return (float)(implode('', $array) . $end);
+        return (string)(implode('', $array) . $end);
     }
 
     /**
