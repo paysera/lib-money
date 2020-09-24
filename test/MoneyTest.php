@@ -400,6 +400,18 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     *
+     * @param string $amount
+     * @param string $expectedResult
+     *
+     * @dataProvider clearAmountValueProvider
+     */
+    public function testClearAmountValue($amount, $expectedResult)
+    {
+        $this->assertSame($expectedResult, Money::clearAmountValue($amount));
+    }
+
+    /**
      * Add provider
      *
      * @return array
@@ -907,6 +919,18 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
         return array(
             array('0.000005', '0.000005'),
             array('0.000005', '-0.000005'),
+        );
+    }
+
+    public function clearAmountValueProvider()
+    {
+        return array(
+            array('1.', '1.000000'),
+            array('.1', '0.100000'),
+            array('0.00001', '0.000010'),
+            array('...1...', '1.000000'),
+            array('1,.1', '1.100000'),
+            array('1', '1.000000'),
         );
     }
 }
