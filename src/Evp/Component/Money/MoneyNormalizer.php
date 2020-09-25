@@ -71,6 +71,27 @@ class MoneyNormalizer implements NormalizerInterface, DenormalizerInterface
     }
 
     /**
+     * @param integer $amountInMinorUnits
+     * @param string  $currency
+     *
+     * @return Money
+     * @throws InvalidDataException
+     * @throws \Exception
+     */
+    public function mapFromMinorUnits($amountInMinorUnits, $currency)
+    {
+        try {
+            $money = Money::createFromMinorUnits($amountInMinorUnits, $currency);
+        } catch (\InvalidArgumentException $exception) {
+            throw new InvalidDataException('Invalid amount specified');
+        }
+        if (!$money->round()->isEqual($money)) {
+            throw new InvalidDataException('Too small fraction for the amount specified');
+        }
+        return $money;
+    }
+
+    /**
      * Maps some structure to raw data. Usually entity object to array
      *
      * @param Money $entity
