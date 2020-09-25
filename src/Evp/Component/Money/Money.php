@@ -850,13 +850,26 @@ class Money implements MoneyInterface
      */
     static public function clearAmountValue($amount)
     {
-        $array = explode('.', trim(str_replace(',', '.', $amount)));
+        $array = explode('.', str_replace(' ', '', trim(str_replace([',', ' '], ['.', ''], $amount))));
+
         if (count($array) > 1) {
             $end = '.' . array_pop($array);
         } else {
             $end = '';
         }
-        return sprintf('%f', (float)(implode('', $array) . $end));
+
+        if ($end === '.') {
+            $end = '';
+        }
+
+        if (
+            isset($array[0])
+            && strlen($array[0]) === 0
+        ) {
+            $array[0] = '0';
+        }
+
+        return (implode('', $array) . $end);
     }
 
     /**
