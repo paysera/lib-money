@@ -55,6 +55,7 @@ class MoneyNormalizer implements NormalizerInterface, DenormalizerInterface
      * @param string  $currency
      *
      * @return Money
+     * @deprecated 2.5.0 use MoneyNormalizer::mapFromMinorUnits instead
      * @throws InvalidDataException
      */
     public function mapFromCents($amountInCents, $currency)

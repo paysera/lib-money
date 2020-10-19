@@ -843,7 +843,7 @@ class Money implements MoneyInterface
      *
      * @param string|int|null $amountInCents
      * @param string|null $currency
-     *
+     * @deprecated 2.5.0 use Money::createFromMinorUnits instead
      * @return static
      */
     static public function createFromCents($amountInCents = null, $currency = null)

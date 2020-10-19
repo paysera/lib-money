@@ -8,7 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Added Money::createFromMinorUnits to return Money object from minor units
 - Added MoneyNormalizer::mapFromMinorUnits to map a Money object from minor units
-
+### Deprecated
+- Deprecated Money::createFromCents - more abstract Money::createFromMinorUnits is to be used instead 
+- Deprecated MoneyNormalizer::mapFromCents - MoneyNormalizer::mapFromMinorUnits is to be used instead
 ## 2.4.3 - 2020-09-25
 ### Changed
 - Changed Money::clearAmountValue does not use float anymore for higher precision
