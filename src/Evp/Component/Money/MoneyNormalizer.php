@@ -55,12 +55,34 @@ class MoneyNormalizer implements NormalizerInterface, DenormalizerInterface
      * @param string  $currency
      *
      * @return Money
+     * @deprecated 2.5.0 use MoneyNormalizer::mapFromMinorUnits instead
      * @throws InvalidDataException
      */
     public function mapFromCents($amountInCents, $currency)
     {
         try {
             $money = Money::createFromCents($amountInCents, $currency);
+        } catch (\InvalidArgumentException $exception) {
+            throw new InvalidDataException('Invalid amount specified');
+        }
+        if (!$money->round()->isEqual($money)) {
+            throw new InvalidDataException('Too small fraction for the amount specified');
+        }
+        return $money;
+    }
+
+    /**
+     * @param integer $amountInMinorUnits
+     * @param string  $currency
+     *
+     * @return Money
+     * @throws InvalidDataException
+     * @throws \Exception
+     */
+    public function mapFromMinorUnits($amountInMinorUnits, $currency)
+    {
+        try {
+            $money = Money::createFromMinorUnits($amountInMinorUnits, $currency);
         } catch (\InvalidArgumentException $exception) {
             throw new InvalidDataException('Invalid amount specified');
         }

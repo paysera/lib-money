@@ -289,6 +289,23 @@ class Money implements MoneyInterface
     }
 
     /**
+     * @param integer|null $amountInMinorUnits
+     * @param string|null $currency
+     * @return $this
+     * @throws \Exception
+     */
+    protected function setAmountInMinorUnits($amountInMinorUnits = null, $currency = null)
+    {
+        if (!preg_match('/^-?\d+$/', $amountInMinorUnits)) {
+            throw new MoneyException('Amount must be integer');
+        }
+        $fraction = static::getFraction($currency);
+        $amount = $this->getMath()->div((string)$amountInMinorUnits, pow(10, $fraction));
+        $this->setAmount($amount);
+        return $this;
+    }
+
+    /**
      * @return integer|null
      *
      * @throws \RuntimeException
@@ -826,7 +843,7 @@ class Money implements MoneyInterface
      *
      * @param string|int|null $amountInCents
      * @param string|null $currency
-     *
+     * @deprecated 2.5.0 use Money::createFromMinorUnits instead
      * @return static
      */
     static public function createFromCents($amountInCents = null, $currency = null)
@@ -834,6 +851,27 @@ class Money implements MoneyInterface
         $money = new static();
         if ($amountInCents !== null) {
             $money->setAmountInCents($amountInCents);
+        }
+        if ($currency !== null) {
+            $money->setCurrency($currency);
+        }
+        return $money;
+    }
+
+    /**
+     * Creates object instance. Used for fluent interface
+     *
+     * @param string|int|null $amountInMinorUnits
+     * @param string|null $currency
+     *
+     * @return static
+     * @throws \Exception
+     */
+    static public function createFromMinorUnits($amountInMinorUnits = null, $currency = null)
+    {
+        $money = new static();
+        if ($amountInMinorUnits !== null) {
+            $money->setAmountInMinorUnits($amountInMinorUnits, $currency);
         }
         if ($currency !== null) {
             $money->setCurrency($currency);

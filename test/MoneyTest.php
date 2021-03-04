@@ -386,6 +386,19 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param Money $expectedMoney
+     * @param string $amountInMinorUnits
+     * @param string $currency
+     *
+     * @dataProvider createAmountInMinorUnitsTestProvider
+     * @throws \Exception
+     */
+    public function testCreateFromMinorUnits($expectedMoney, $amountInMinorUnits, $currency)
+    {
+        $this->assertEquals($expectedMoney, Money::createFromMinorUnits($amountInMinorUnits, $currency));
+    }
+
+    /**
      * Test unsupported currency
      *
      * @param int $amount
@@ -886,6 +899,24 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
             array(new Money('-1', 'MGA'), -10),
             array(new Money('1', 'KWD'), 1000),
             array(new Money('-1', 'KWD'), -1000),
+            array(new Money('1', 'XAU'), 100000),
+            array(new Money('-1', 'XAU'), -100000),
+        );
+    }
+
+    public function createAmountInMinorUnitsTestProvider()
+    {
+        return array(
+            array(new Money('0.01', 'EUR'), 1, 'EUR'),
+            array(new Money('-0.01', 'EUR'), -1, 'EUR'),
+            array(new Money('1', 'JPY'), 1, 'JPY'),
+            array(new Money('-1', 'JPY'), -1, 'JPY'),
+            array(new Money('0.100000', 'MGA'), 1, 'MGA'),
+            array(new Money('-0.100000', 'MGA'), -1, 'MGA'),
+            array(new Money('0.001000', 'KWD'), 1, 'KWD'),
+            array(new Money('-0.001000', 'KWD'), -1, 'KWD'),
+            array(new Money('0.000010', 'XAU'), 1, 'XAU'),
+            array(new Money('-0.000010', 'XAU'), -1, 'XAU'),
         );
     }
 
