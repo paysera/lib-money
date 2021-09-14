@@ -108,6 +108,7 @@ class Money implements MoneyInterface
         'MNT' => 2,
         'MOP' => 1,
         'MRO' => 1,
+        'MRU' => 2,
         'MUR' => 2,
         'MVR' => 2,
         'MWK' => 2,
