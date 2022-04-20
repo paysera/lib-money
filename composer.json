@@ -1,6 +1,8 @@
 {
     "name": "evp/money",
     "description": "Money library",
+    "type": "library",
+    "license": "MIT",
     "suggest": {
         "paysera/lib-serializer": "Allows to Serialize/Deserialize Money objects"
     },
