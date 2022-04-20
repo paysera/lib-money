@@ -2,7 +2,7 @@
 
 namespace Evp\Component\Money;
 
-use Evp\Component\DependencyInjection\ConfiguratorInterface;
+use Paysera\Component\DependencyInjection\ConfiguratorInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 
@@ -17,4 +17,4 @@ class MoneyConfigurator implements ConfiguratorInterface
         );
     }
 
-} 
+}
