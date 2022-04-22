@@ -7,13 +7,13 @@
         "paysera/lib-serializer": "Allows to Serialize/Deserialize Money objects"
     },
     "autoload": {
-        "psr-0": {
-            "Evp\\Component\\Money": "src/"
+        "psr-4": {
+            "Evp\\Component\\Money\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Evp\\Component\\Money\\Tests\\": "test/"
+            "Evp\\Component\\Money\\Tests\\": "tests/"
         }
     },
     "require": {
