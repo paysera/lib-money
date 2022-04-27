@@ -17,12 +17,20 @@
         }
     },
     "require": {
-        "maba/monetary": "~0.10"
+        "php": ">=5.6",
+        "ext-bcmath": "*",
+        "ext-mbstring": "*",
+        "maba/math": "^1.0",
+        "maba/monetary": "^0.10.0",
+        "paysera/lib-dependency-injection": "^1.0",
+        "paysera/lib-serializer": "^1.0 || ^2.0 || ^3.0",
+        "symfony/dependency-injection": "^2.3 || ^3.0 || ^4.0 || ^5.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "~4.8"
+        "phpunit/phpunit": "^5.0"
     },
     "config": {
-        "bin-dir": "bin"
+        "bin-dir": "bin",
+        "sort-packages": true
     }
 }
