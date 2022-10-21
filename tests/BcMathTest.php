@@ -3,8 +3,9 @@
 namespace Evp\Component\Money\Tests;
 
 use Evp\Component\Money\BcMath;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
-class BcMathTest extends \PHPUnit_Framework_TestCase
+class BcMathTest extends TestCase
 {
     /**
      * @var \Evp\Component\Money\BcMath
@@ -14,7 +15,7 @@ class BcMathTest extends \PHPUnit_Framework_TestCase
     /**
      * Set up
      */
-    public function setUp()
+    public function set_up()
     {
         $this->math = new BcMath($scale = 6);
     }

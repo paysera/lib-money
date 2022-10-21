@@ -3,8 +3,10 @@
 namespace Evp\Component\Money\Tests;
 
 use Evp\Component\Money\CurrencyIsoNumber;
+use Evp\Component\Money\MoneyException;
+use PHPUnit\Framework\TestCase;
 
-class CurrencyIsoNumberTest extends \PHPUnit_Framework_TestCase
+class CurrencyIsoNumberTest extends TestCase
 {
     /**
      * @param string $currencyNumber
@@ -22,11 +24,10 @@ class CurrencyIsoNumberTest extends \PHPUnit_Framework_TestCase
      * @param string $currencyNumber
      *
      * @dataProvider getCurrencyCodeExceptionProvider
-     *
-     * @expectedException \Evp\Component\Money\MoneyException
      */
     public function testGetCurrencyCodeException($currencyNumber)
     {
+        $this->expectException(MoneyException::class);
         $currencyIsoNumber = new CurrencyIsoNumber();
         $currencyIsoNumber->getCurrencyCode($currencyNumber);
     }
@@ -47,11 +48,10 @@ class CurrencyIsoNumberTest extends \PHPUnit_Framework_TestCase
      * @param string $currencyCode
      *
      * @dataProvider getCurrencyNumberExceptionProvider
-     *
-     * @expectedException \Evp\Component\Money\MoneyException
      */
     public function testGetCurrencyNumberException($currencyCode)
     {
+        $this->expectException(MoneyException::class);
         $currencyIsoNumber = new CurrencyIsoNumber();
         $currencyIsoNumber->getCurrencyNumber($currencyCode);
     }

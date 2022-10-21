@@ -4,8 +4,9 @@ namespace Evp\Component\Money\Tests;
 
 use Evp\Component\Money\AggregatedMoney;
 use Evp\Component\Money\Money;
+use PHPUnit\Framework\TestCase;
 
-class AggregatedMoneyTest extends \PHPUnit_Framework_TestCase
+class AggregatedMoneyTest extends TestCase
 {
     /**
      * @param Money $one
