@@ -304,6 +304,7 @@ class Money implements MoneyInterface
      * @param string|null $currency
      * @return $this
      * @throws \Exception
+     * @internal
      */
     protected function setAmountInMinorUnits($amountInMinorUnits = null, $currency = null)
     {
