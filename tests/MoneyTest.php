@@ -3,15 +3,19 @@
 namespace Evp\Component\Money\Tests;
 
 use Evp\Component\Money\Money;
+use Evp\Component\Money\MoneyException;
+use Exception;
+use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 
-class MoneyTest extends \PHPUnit_Framework_TestCase
+class MoneyTest extends TestCase
 {
     /**
      * Test add
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $operandTwo
-     * @param \Evp\Component\Money\Money $expected
+     * @param Money $operandOne
+     * @param Money $operandTwo
+     * @param Money $expected
      *
      * @dataProvider addProvider
      */
@@ -23,9 +27,9 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     /**
      * Test sub
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $operandTwo
-     * @param \Evp\Component\Money\Money $expected
+     * @param Money $operandOne
+     * @param Money $operandTwo
+     * @param Money $expected
      *
      * @dataProvider subProvider
      */
@@ -37,9 +41,9 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     /**
      * Test mul
      *
-     * @param \Evp\Component\Money\Money $operandOne
+     * @param Money $operandOne
      * @param string $multiplier
-     * @param \Evp\Component\Money\Money $expected
+     * @param Money $expected
      *
      * @dataProvider mulProvider
      */
@@ -51,9 +55,9 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     /**
      * Test div
      *
-     * @param \Evp\Component\Money\Money $operandOne
+     * @param Money $operandOne
      * @param string $divisor
-     * @param \Evp\Component\Money\Money $expected
+     * @param Money $expected
      *
      * @dataProvider divProvider
      */
@@ -65,49 +69,49 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     /**
      * Test add exception
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $operandTwo
+     * @param Money $operandOne
+     * @param Money $operandTwo
      *
-     * @expectedException \Evp\Component\Money\MoneyException
      * @dataProvider      addExceptionProvider
      */
     public function testAddException(Money $operandOne, Money $operandTwo)
     {
+        $this->expectException(MoneyException::class);
         $operandOne->add($operandTwo);
     }
 
     /**
      * Test sub exception
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $operandTwo
+     * @param Money $operandOne
+     * @param Money $operandTwo
      *
-     * @expectedException \Evp\Component\Money\MoneyException
      * @dataProvider      subExceptionProvider
      */
     public function testSubException(Money $operandOne, Money $operandTwo)
     {
+        $this->expectException(MoneyException::class);
         $operandOne->sub($operandTwo);
     }
 
     /**
      * Test div exception with division of zero
      *
-     * @param \Evp\Component\Money\Money $operandOne
+     * @param Money $operandOne
      *
-     * @expectedException \Evp\Component\Money\MoneyException
      * @dataProvider      divExceptionProvider
      */
     public function testDivException(Money $operandOne)
     {
+        $this->expectException(MoneyException::class);
         $operandOne->div(0);
     }
 
     /**
      * Test is equal
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $operandTwo
+     * @param Money $operandOne
+     * @param Money $operandTwo
      *
      * @dataProvider isEqualProvider
      */
@@ -119,8 +123,8 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     /**
      * Test is greater
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $operandTwo
+     * @param Money $operandOne
+     * @param Money $operandTwo
      *
      * @dataProvider isGtProvider
      */
@@ -132,8 +136,8 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     /**
      * Test is greater or equal
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $operandTwo
+     * @param Money $operandOne
+     * @param Money $operandTwo
      *
      * @dataProvider isGteProvider
      */
@@ -145,8 +149,8 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     /**
      * Test is less
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $operandTwo
+     * @param Money $operandOne
+     * @param Money $operandTwo
      *
      * @dataProvider isLtProvider
      */
@@ -158,8 +162,8 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     /**
      * Test is less or equal
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $operandTwo
+     * @param Money $operandOne
+     * @param Money $operandTwo
      *
      * @dataProvider isLteProvider
      */
@@ -171,64 +175,64 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     /**
      * Test is greater exception
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $operandTwo
+     * @param Money $operandOne
+     * @param Money $operandTwo
      *
      * @dataProvider      isGtExceptionProvider
-     * @expectedException \Evp\Component\Money\MoneyException
      */
     public function testIsGtException(Money $operandOne, Money $operandTwo)
     {
+        $this->expectException(MoneyException::class);
         $operandOne->isGt($operandTwo);
     }
 
     /**
      * Test is greater or equal exception
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $operandTwo
+     * @param Money $operandOne
+     * @param Money $operandTwo
      *
      * @dataProvider      isGteExceptionProvider
-     * @expectedException \Evp\Component\Money\MoneyException
      */
     public function testIsGteException(Money $operandOne, Money $operandTwo)
     {
+        $this->expectException(MoneyException::class);
         $operandOne->isGte($operandTwo);
     }
 
     /**
      * Test is less exception
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $operandTwo
+     * @param Money $operandOne
+     * @param Money $operandTwo
      *
      * @dataProvider      isLtExceptionProvider
-     * @expectedException \Evp\Component\Money\MoneyException
      */
     public function testIsLtException(Money $operandOne, Money $operandTwo)
     {
+        $this->expectException(MoneyException::class);
         $operandOne->isLt($operandTwo);
     }
 
     /**
      * Test is less or equal exception
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $operandTwo
+     * @param Money $operandOne
+     * @param Money $operandTwo
      *
      * @dataProvider      isLteExceptionProvider
-     * @expectedException \Evp\Component\Money\MoneyException
      */
     public function testIsLteException(Money $operandOne, Money $operandTwo)
     {
+        $this->expectException(MoneyException::class);
         $operandOne->isLte($operandTwo);
     }
 
     /**
      * Test is same currency
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $operandTwo
+     * @param Money $operandOne
+     * @param Money $operandTwo
      *
      * @dataProvider isSameCurrencyProvider
      */
@@ -240,8 +244,8 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     /**
      * Test negate
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $expected
+     * @param Money $operandOne
+     * @param Money $expected
      *
      * @dataProvider negateProvider
      */
@@ -253,7 +257,7 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     /**
      * Test format amount
      *
-     * @param \Evp\Component\Money\Money $operandOne
+     * @param Money $operandOne
      * @param int $precision
      * @param string $delimiter
      * @param string $thousandSeparator
@@ -269,8 +273,8 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     /**
      * Test ceil
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $expected
+     * @param Money $operandOne
+     * @param Money $expected
      * @param integer|null $precision
      *
      * @dataProvider ceilProvider
@@ -283,8 +287,8 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     /**
      * Test floor
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $expected
+     * @param Money $operandOne
+     * @param Money $expected
      * @param integer|null $precision
      *
      * @dataProvider floorProvider
@@ -297,8 +301,8 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     /**
      * Test round
      *
-     * @param \Evp\Component\Money\Money $operandOne
-     * @param \Evp\Component\Money\Money $expected
+     * @param Money $operandOne
+     * @param Money $expected
      *
      * @dataProvider roundProvider
      */
@@ -310,7 +314,7 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     /**
      * Test getAsString
      *
-     * @param \Evp\Component\Money\Money $operandOne
+     * @param Money $operandOne
      * @param string $expected
      *
      * @dataProvider getAsStringProvider
@@ -325,7 +329,7 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
      *
      * @param string $operandOnemount
      * @param string $currency
-     * @param \Evp\Component\Money\Money $expected
+     * @param Money $expected
      *
      * @dataProvider createFromNonDelimiterProvider
      */
@@ -338,7 +342,7 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
      * Test create zero
      *
      * @param string $currency
-     * @param \Evp\Component\Money\Money $expected
+     * @param Money $expected
      *
      * @dataProvider createZeroProvider
      */
@@ -367,10 +371,10 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
      * @param string $currency
      *
      * @dataProvider      setAmountExceptionProvider
-     * @expectedException \InvalidArgumentException
      */
     public function testSetAmountException($amount, $currency)
     {
+        $this->expectException(InvalidArgumentException::class);
         Money::create($amount, $currency);
     }
 
@@ -391,7 +395,7 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
      * @param string $currency
      *
      * @dataProvider createAmountInMinorUnitsTestProvider
-     * @throws \Exception
+     * @throws Exception
      */
     public function testCreateFromMinorUnits($expectedMoney, $amountInMinorUnits, $currency)
     {
@@ -405,10 +409,10 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
      * @param string $currency
      *
      * @dataProvider unsupportedCurrencyProvider
-     * @expectedException \InvalidArgumentException
      */
     public function testUnsupportedCurrency($amount, $currency)
     {
+        $this->expectException(InvalidArgumentException::class);
         new Money($amount, $currency);
     }
 
