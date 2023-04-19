@@ -1,6 +1,10 @@
 # PHP Library for Operations with Money
 
-[![Build Status](https://travis-ci.org/paysera/lib-money.svg?branch=master)](https://travis-ci.org/paysera/lib-money)
+[![Build Status][ico-build]][link-build]
+[![Latest Stable Version][ico-version]][link-packagist]
+[![Total Downloads][ico-downloads]][link-packagist]
+[![License][ico-license]](LICENSE)
+[![PHP Version Require][ico-php]][link-packagist]
 
 Instead of storing prices, profit and any other amount of money in float or integer variable, use Money value object
 instead. It groups amount with currency, as amount without currency does not give much information.
@@ -70,3 +74,11 @@ $timesTwo = $money->mul(2);
 
 $money->isLt($timesTwo); // true
 ```
+
+[ico-build]: https://github.com/paysera/lib-money/workflows/CI/badge.svg
+[ico-version]: https://img.shields.io/packagist/v/evp/money.svg
+[ico-downloads]: https://img.shields.io/packagist/dt/evp/money.svg
+[ico-license]: https://img.shields.io/badge/license-MIT-blue.svg
+[ico-php]: http://poser.pugx.org/evp/money/require/php
+[link-build]: https://github.com/paysera/lib-money/actions
+[link-packagist]: https://packagist.org/packages/evp/money
