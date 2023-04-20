@@ -210,11 +210,14 @@ class Money implements MoneyInterface
     /**
      * Set amount
      *
+     * Do not use this method, it is meant be used only internally by this
+     * library. The method visibility will be changed to private in future
+     * versions.
+     *
      * @param string $amount
-     *
      * @return static
-     *
      * @throws MoneyException
+     * @internal
      */
     public function setAmount($amount)
     {
@@ -243,11 +246,16 @@ class Money implements MoneyInterface
     /**
      * Sets amount in cents
      *
+     * Do not use this method, it is meant be used only internally by this
+     * library. The method visibility will be changed to private in future
+     * versions.
+     *
      * @param integer $amountInCents
-     *
      * @return static
-     *
      * @throws MoneyException
+     * @internal
+     * @deprecated 2.7.0
+     * @see Money::setAmountInMinorUnits()
      */
     protected function setAmountInCents($amountInCents)
     {
@@ -274,6 +282,8 @@ class Money implements MoneyInterface
      * @return integer|null
      *
      * @throws \RuntimeException
+     * @deprecated 2.7.0
+     * @see Money::getAmountInMinorUnits()
      */
     public function getAmountInCents()
     {
@@ -294,6 +304,7 @@ class Money implements MoneyInterface
      * @param string|null $currency
      * @return $this
      * @throws \Exception
+     * @internal
      */
     protected function setAmountInMinorUnits($amountInMinorUnits = null, $currency = null)
     {
@@ -373,11 +384,14 @@ class Money implements MoneyInterface
     /**
      * Set currency
      *
+     * Do not use this method, it is meant be used only internally by this
+     * library. The method visibility will be changed to private in future
+     * versions.
+     *
      * @param string $currency
-     *
      * @return $this
-     *
      * @throws MoneyException
+     * @internal
      */
     public function setCurrency($currency)
     {
@@ -833,6 +847,8 @@ class Money implements MoneyInterface
      * @param string|null $currency
      *
      * @return static
+     * @deprecated 2.7.0
+     * @see Money::__construct()
      */
     static public function create($amount = null, $currency = null)
     {
