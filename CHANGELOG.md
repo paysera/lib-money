@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Mark `Money::setAmountInCents()` as `@internal`
 - Mark `Money::setAmountInMinorUnits()` as `@internal`
 - Update PHPUnit version
+- Migrate from Travis CI to GitHub Actions
 
 ### Deprecated
 - Deprecate `Money::setAmountInCents()` in favor of `Money::setAmountInMinorUnits()`
