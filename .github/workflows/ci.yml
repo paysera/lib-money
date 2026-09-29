@@ -11,9 +11,10 @@ permissions:
 
 jobs:
   phpunit:
-    name: Run tests on ${{ matrix.php-version }} with ${{ matrix.dependency-versions }} dependencies
+    name: Run tests on ${{ matrix.php-version }} with Symfony ${{ matrix.symfony }} and ${{ matrix.dependency-versions }} dependencies
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         php-version:
           - '7.0'
@@ -26,9 +27,39 @@ jobs:
           - '8.2'
           - '8.3'
           - '8.4'
+        symfony:
+          - '2.*'
+          - '3.*'
+          - '4.*'
+          - '5.*'
+          - '6.*'
+          - '7.*'
         dependency-versions:
           - 'lowest'
           - 'highest'
+        exclude:
+          - { php-version: '7.0', symfony: '4.*' }
+          - { php-version: '7.0', symfony: '5.*' }
+          - { php-version: '7.1', symfony: '5.*' }
+          - { php-version: '7.0', symfony: '6.*' }
+          - { php-version: '7.1', symfony: '6.*' }
+          - { php-version: '7.2', symfony: '6.*' }
+          - { php-version: '7.3', symfony: '6.*' }
+          - { php-version: '7.4', symfony: '6.*' }
+          - { php-version: '7.0', symfony: '7.*' }
+          - { php-version: '7.1', symfony: '7.*' }
+          - { php-version: '7.2', symfony: '7.*' }
+          - { php-version: '7.3', symfony: '7.*' }
+          - { php-version: '7.4', symfony: '7.*' }
+          - { php-version: '8.0', symfony: '7.*' }
+          - { php-version: '8.1', symfony: '7.*' }
+        include:
+          - { symfony: '2.*', constraint: '^2.3' }
+          - { symfony: '3.*', constraint: '^3.0' }
+          - { symfony: '4.*', constraint: '^4.0' }
+          - { symfony: '5.*', constraint: '^5.0' }
+          - { symfony: '6.*', constraint: '^6.0' }
+          - { symfony: '7.*', constraint: '^7.4' }
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -37,13 +68,24 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
+          tools: flex
 
       - name: Allow packages with security advisories
         if: matrix.php-version != '7.0' && matrix.php-version != '7.1'
         run: composer config policy.advisories.block false
 
+      - name: Pin Symfony ${{ matrix.symfony }}
+        run: >-
+          composer require --no-update
+          symfony/dependency-injection:${{ matrix.constraint }}
+          symfony/config:'${{ matrix.symfony }}'
+          symfony/property-access:'${{ matrix.symfony }}'
+          symfony/validator:'${{ matrix.symfony }}'
+
       - name: Install dependencies
         uses: ramsey/composer-install@v2
+        env:
+          SYMFONY_REQUIRE: ${{ matrix.symfony }}
         with:
           dependency-versions: ${{ matrix.dependency-versions }}
 
