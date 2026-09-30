@@ -23,13 +23,12 @@ class MoneyFactoryTest extends TestCase
     }
 
     /**
-     * @param string $method
      * @param array<int, string|int> $arguments
      * @param array<string, string> $expected
      *
      * @dataProvider createProvider
      */
-    public function testCreate($method, array $arguments, array $expected)
+    public function testCreate(string $method, array $arguments, array $expected)
     {
         $money = $this->createFactory()->$method(...$arguments);
 

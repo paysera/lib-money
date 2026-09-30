@@ -62,11 +62,10 @@ class MoneyNormalizerTest extends TestCase
 
     /**
      * @param array<string, string> $data
-     * @param string $message
      *
      * @dataProvider mapToEntityRejectsProvider
      */
-    public function testMapToEntityRejects(array $data, $message)
+    public function testMapToEntityRejects(array $data, string $message)
     {
         $this->expectException(InvalidDataException::class);
         $this->expectExceptionMessage($message);
@@ -95,14 +94,11 @@ class MoneyNormalizerTest extends TestCase
     }
 
     /**
-     * @param string $method
-     * @param int $amount
-     * @param string $currency
      * @param array<string, string> $expected
      *
      * @dataProvider mapFromCentsAndMinorUnitsProvider
      */
-    public function testMapFromCentsAndMinorUnits($method, $amount, $currency, array $expected)
+    public function testMapFromCentsAndMinorUnits(string $method, int $amount, string $currency, array $expected)
     {
         $money = (new MoneyNormalizer())->$method($amount, $currency);
 
@@ -138,14 +134,11 @@ class MoneyNormalizerTest extends TestCase
     }
 
     /**
-     * @param string $method
      * @param mixed $amount
-     * @param string $currency
-     * @param string $message
      *
      * @dataProvider mapFromCentsAndMinorUnitsRejectsProvider
      */
-    public function testMapFromCentsAndMinorUnitsRejects($method, $amount, $currency, $message)
+    public function testMapFromCentsAndMinorUnitsRejects(string $method, $amount, string $currency, string $message)
     {
         $this->expectException(InvalidDataException::class);
         $this->expectExceptionMessage($message);
@@ -176,13 +169,11 @@ class MoneyNormalizerTest extends TestCase
     }
 
     /**
-     * @param string $amount
-     * @param string $currency
      * @param array<string, string> $expected
      *
      * @dataProvider mapFromEntityProvider
      */
-    public function testMapFromEntity($amount, $currency, array $expected)
+    public function testMapFromEntity(string $amount, string $currency, array $expected)
     {
         $this->assertSame($expected, (new MoneyNormalizer())->mapFromEntity(new Money($amount, $currency)));
     }

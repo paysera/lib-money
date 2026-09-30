@@ -989,13 +989,12 @@ class MoneyTest extends TestCase
     }
 
     /**
-     * @param string $method
      * @param string|null $amount
      * @param string|int|null $expected
      *
      * @dataProvider amountGettersProvider
      */
-    public function testAmountGetters($method, $amount, $expected)
+    public function testAmountGetters(string $method, $amount, $expected)
     {
         $this->assertSame($expected, (new Money($amount, 'EUR'))->$method());
     }
@@ -1016,11 +1015,9 @@ class MoneyTest extends TestCase
     }
 
     /**
-     * @param string $method
-     *
      * @dataProvider integerGetterProvider
      */
-    public function testAmountsTooLargeForAnIntegerAreRejected($method)
+    public function testAmountsTooLargeForAnIntegerAreRejected(string $method)
     {
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Amount is too large to be returned as integer');
@@ -1040,13 +1037,12 @@ class MoneyTest extends TestCase
     }
 
     /**
-     * @param string $method
      * @param int|string|null $amount
      * @param array<string, string|null> $expected
      *
      * @dataProvider createFromCentsAndNoDelimiterAmountProvider
      */
-    public function testCreateFromCentsAndNoDelimiterAmount($method, $amount, array $expected)
+    public function testCreateFromCentsAndNoDelimiterAmount(string $method, $amount, array $expected)
     {
         $money = Money::$method($amount, 'EUR');
 
@@ -1085,11 +1081,9 @@ class MoneyTest extends TestCase
     }
 
     /**
-     * @param string $method
-     *
      * @dataProvider createFromIntegerUnitsProvider
      */
-    public function testCreateFromCentsOrMinorUnitsRejectsANonInteger($method)
+    public function testCreateFromCentsOrMinorUnitsRejectsANonInteger(string $method)
     {
         $this->expectException(MoneyException::class);
         $this->expectExceptionMessage('Amount must be integer');
@@ -1129,12 +1123,9 @@ class MoneyTest extends TestCase
     }
 
     /**
-     * @param string $amount
-     * @param bool $expected
-     *
      * @dataProvider isPositiveProvider
      */
-    public function testIsPositive($amount, $expected)
+    public function testIsPositive(string $amount, bool $expected)
     {
         $this->assertSame($expected, (new Money($amount, 'EUR'))->isPositive());
     }
@@ -1152,16 +1143,18 @@ class MoneyTest extends TestCase
     }
 
     /**
-     * @param string $amount
-     * @param string $currency
      * @param int|null $fraction
-     * @param string $separator
      * @param array<string, string> $expected
      *
      * @dataProvider getArrayRepresentationProvider
      */
-    public function testGetArrayRepresentation($amount, $currency, $fraction, $separator, array $expected)
-    {
+    public function testGetArrayRepresentation(
+        string $amount,
+        string $currency,
+        $fraction,
+        string $separator,
+        array $expected
+    ) {
         $this->assertSame($expected, (new Money($amount, $currency))->getArrayRepresentation($fraction, $separator));
     }
 
