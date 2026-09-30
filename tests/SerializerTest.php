@@ -7,6 +7,7 @@ namespace Evp\Component\Money\Tests;
 use Evp\Component\Money\Money;
 use Evp\Component\Money\Serializer;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 class SerializerTest extends TestCase
 {
@@ -17,7 +18,7 @@ class SerializerTest extends TestCase
         $this->assertFileExists($file);
         $this->assertXmlStringEqualsXmlString(
             '<serializer>'
-            . '<class name="Evp\Component\Money\Money" access-type="public_method" exclusion-policy="ALL">'
+            . '<class name="' . Money::class . '" access-type="public_method" exclusion-policy="ALL">'
             . '<property name="amount" type="string" expose="true"/>'
             . '<property name="currency" type="string" expose="true"/>'
             . '</class>'
@@ -28,7 +29,6 @@ class SerializerTest extends TestCase
 
     public function testNamespacePrefixIsTheNamespaceOfMoney()
     {
-        $this->assertSame('Evp\Component\Money', Serializer::getNamespacePrefix());
-        $this->assertStringStartsWith(Serializer::getNamespacePrefix() . '\\', Money::class);
+        $this->assertSame((new ReflectionClass(Money::class))->getNamespaceName(), Serializer::getNamespacePrefix());
     }
 }
