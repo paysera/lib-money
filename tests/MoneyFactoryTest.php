@@ -29,7 +29,10 @@ class MoneyFactoryTest extends TestCase
      */
     public function testCreate(string $method, array $arguments, Money $expected)
     {
-        $this->assertEquals($expected, $this->createFactory()->$method(...$arguments));
+        $result = $this->createFactory()->$method(...$arguments);
+
+        $this->assertEquals($expected, $result);
+        $this->assertSame($expected->getCurrency(), $result->getCurrency());
     }
 
     /**
