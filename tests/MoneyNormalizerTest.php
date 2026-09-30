@@ -195,10 +195,10 @@ class MoneyNormalizerTest extends TestCase
                 'EUR',
                 ['amount' => '10.50', 'currency' => 'EUR'],
             ],
-            'formatted to the decimals of the currency (2.0.0)' => [
-                '42.421234',
+            'truncated, not rounded, to the decimals of the currency' => [
+                '10.559',
                 'EUR',
-                ['amount' => '42.42', 'currency' => 'EUR'],
+                ['amount' => '10.55', 'currency' => 'EUR'],
             ],
             'currency without decimals' => ['1050', 'JPY', ['amount' => '1050', 'currency' => 'JPY']],
         ];
