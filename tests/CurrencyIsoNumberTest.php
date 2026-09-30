@@ -61,12 +61,12 @@ class CurrencyIsoNumberTest extends TestCase
      */
     public function getCurrencyCodeProvider()
     {
-        return array(
-            array('051', 'AMD'),
-            array('032', 'ARS'),
-            array('978', 'EUR'),
-            array('826', 'GBP'),
-        );
+        return [
+            ['051', 'AMD'],
+            ['032', 'ARS'],
+            ['978', 'EUR'],
+            ['826', 'GBP'],
+        ];
     }
 
     /**
@@ -74,12 +74,12 @@ class CurrencyIsoNumberTest extends TestCase
      */
     public function getCurrencyCodeExceptionProvider()
     {
-        return array(
-            array('001'),
-            array('099'),
-            array('444'),
-            array('741'),
-        );
+        return [
+            ['001'],
+            ['099'],
+            ['444'],
+            ['741'],
+        ];
     }
 
     /**
@@ -87,12 +87,12 @@ class CurrencyIsoNumberTest extends TestCase
      */
     public function getCurrencyNumberProvider()
     {
-        return array(
-            array('NOK', '578'),
-            array('AUD', '036'),
-            array('EUR', '978'),
-            array('TRY', '949'),
-        );
+        return [
+            ['NOK', '578'],
+            ['AUD', '036'],
+            ['EUR', '978'],
+            ['TRY', '949'],
+        ];
     }
 
     /**
@@ -100,10 +100,10 @@ class CurrencyIsoNumberTest extends TestCase
      */
     public function getCurrencyNumberExceptionProvider()
     {
-        return array(
-            array('BUR'),
-            array('ZIX'),
-            array('MED'),
-        );
+        return [
+            ['BUR'],
+            ['ZIX'],
+            ['MED'],
+        ];
     }
 }

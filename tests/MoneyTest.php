@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Evp\Component\Money\Tests;
 
 use Evp\Component\Money\Money;
@@ -7,6 +9,7 @@ use Evp\Component\Money\MoneyException;
 use Exception;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 class MoneyTest extends TestCase
 {
@@ -435,16 +438,16 @@ class MoneyTest extends TestCase
      */
     public function addProvider()
     {
-        return array(
-            array(new Money('1', 'EUR'), new Money('1', 'EUR'), new Money('2', 'EUR')),
-            array(new Money('-1', 'EUR'), new Money('-1', 'EUR'), new Money('-2', 'EUR')),
-            array(new Money('1', 'USD'), new Money('-1', 'USD'), new Money('0', 'USD')),
-            array(new Money('-1', 'RUB'), new Money('1', 'RUB'), new Money('0', 'RUB')),
-            array(new Money('0.5', 'EUR'), new Money('0.5', 'EUR'), new Money('1', 'EUR')),
-            array(new Money('-0.5', 'EUR'), new Money('-0.5', 'EUR'), new Money('-1', 'EUR')),
-            array(new Money('-0.5', 'RUB'), new Money('0', 'RUB'), new Money('-0.5', 'RUB')),
-            array(new Money('-0', 'USD'), new Money('0', 'USD'), new Money('0', 'USD')),
-        );
+        return [
+            [new Money('1', 'EUR'), new Money('1', 'EUR'), new Money('2', 'EUR')],
+            [new Money('-1', 'EUR'), new Money('-1', 'EUR'), new Money('-2', 'EUR')],
+            [new Money('1', 'USD'), new Money('-1', 'USD'), new Money('0', 'USD')],
+            [new Money('-1', 'RUB'), new Money('1', 'RUB'), new Money('0', 'RUB')],
+            [new Money('0.5', 'EUR'), new Money('0.5', 'EUR'), new Money('1', 'EUR')],
+            [new Money('-0.5', 'EUR'), new Money('-0.5', 'EUR'), new Money('-1', 'EUR')],
+            [new Money('-0.5', 'RUB'), new Money('0', 'RUB'), new Money('-0.5', 'RUB')],
+            [new Money('-0', 'USD'), new Money('0', 'USD'), new Money('0', 'USD')],
+        ];
     }
 
     /**
@@ -454,15 +457,15 @@ class MoneyTest extends TestCase
      */
     public function subProvider()
     {
-        return array(
-            array(new Money('1', 'EUR'), new Money('1', 'EUR'), new Money('0', 'EUR')),
-            array(new Money('1', 'USD'), new Money('-1', 'USD'), new Money('2', 'USD')),
-            array(new Money('-1', 'RUB'), new Money('1', 'RUB'), new Money('-2', 'RUB')),
-            array(new Money('0.5', 'EUR'), new Money('0.5', 'EUR'), new Money('0', 'EUR')),
-            array(new Money('-0.5', 'EUR'), new Money('-0.5', 'EUR'), new Money('0', 'EUR')),
-            array(new Money('-0.5', 'RUB'), new Money('0', 'RUB'), new Money('-0.5', 'RUB')),
-            array(new Money('-0', 'USD'), new Money('0', 'USD'), new Money('0', 'USD')),
-        );
+        return [
+            [new Money('1', 'EUR'), new Money('1', 'EUR'), new Money('0', 'EUR')],
+            [new Money('1', 'USD'), new Money('-1', 'USD'), new Money('2', 'USD')],
+            [new Money('-1', 'RUB'), new Money('1', 'RUB'), new Money('-2', 'RUB')],
+            [new Money('0.5', 'EUR'), new Money('0.5', 'EUR'), new Money('0', 'EUR')],
+            [new Money('-0.5', 'EUR'), new Money('-0.5', 'EUR'), new Money('0', 'EUR')],
+            [new Money('-0.5', 'RUB'), new Money('0', 'RUB'), new Money('-0.5', 'RUB')],
+            [new Money('-0', 'USD'), new Money('0', 'USD'), new Money('0', 'USD')],
+        ];
     }
 
     /**
@@ -472,16 +475,16 @@ class MoneyTest extends TestCase
      */
     public function mulProvider()
     {
-        return array(
-            array(new Money('1', 'EUR'), '1', new Money('1', 'EUR')),
-            array(new Money('-1', 'EUR'), '-1', new Money('1', 'EUR')),
-            array(new Money('1', 'USD'), '-1', new Money('-1', 'USD')),
-            array(new Money('-1', 'RUB'), '1', new Money('-1', 'RUB')),
-            array(new Money('0.5', 'EUR'), '0.5', new Money('0.25', 'EUR')),
-            array(new Money('-0.5', 'EUR'), '-0.5', new Money('0.25', 'EUR')),
-            array(new Money('-0.5', 'RUB'), '0', new Money('0', 'RUB')),
-            array(new Money('-0', 'USD'), '0', new Money('0', 'USD')),
-        );
+        return [
+            [new Money('1', 'EUR'), '1', new Money('1', 'EUR')],
+            [new Money('-1', 'EUR'), '-1', new Money('1', 'EUR')],
+            [new Money('1', 'USD'), '-1', new Money('-1', 'USD')],
+            [new Money('-1', 'RUB'), '1', new Money('-1', 'RUB')],
+            [new Money('0.5', 'EUR'), '0.5', new Money('0.25', 'EUR')],
+            [new Money('-0.5', 'EUR'), '-0.5', new Money('0.25', 'EUR')],
+            [new Money('-0.5', 'RUB'), '0', new Money('0', 'RUB')],
+            [new Money('-0', 'USD'), '0', new Money('0', 'USD')],
+        ];
     }
 
     /**
@@ -491,16 +494,16 @@ class MoneyTest extends TestCase
      */
     public function divProvider()
     {
-        return array(
-            array(new Money('1', 'EUR'), '1', new Money('1', 'EUR')),
-            array(new Money('1', 'EUR'), '2', new Money('0.5', 'EUR')),
-            array(new Money('1', 'EUR'), '3', new Money('0.333333', 'EUR')),
-            array(new Money('-1', 'EUR'), '-1', new Money('1', 'EUR')),
-            array(new Money('1', 'USD'), '-1', new Money('-1', 'USD')),
-            array(new Money('-1', 'RUB'), '1', new Money('-1', 'RUB')),
-            array(new Money('0.5', 'EUR'), '0.5', new Money('1', 'EUR')),
-            array(new Money('-0.5', 'EUR'), '-0.5', new Money('1', 'EUR')),
-        );
+        return [
+            [new Money('1', 'EUR'), '1', new Money('1', 'EUR')],
+            [new Money('1', 'EUR'), '2', new Money('0.5', 'EUR')],
+            [new Money('1', 'EUR'), '3', new Money('0.333333', 'EUR')],
+            [new Money('-1', 'EUR'), '-1', new Money('1', 'EUR')],
+            [new Money('1', 'USD'), '-1', new Money('-1', 'USD')],
+            [new Money('-1', 'RUB'), '1', new Money('-1', 'RUB')],
+            [new Money('0.5', 'EUR'), '0.5', new Money('1', 'EUR')],
+            [new Money('-0.5', 'EUR'), '-0.5', new Money('1', 'EUR')],
+        ];
     }
 
     /**
@@ -510,9 +513,9 @@ class MoneyTest extends TestCase
      */
     public function addExceptionProvider()
     {
-        return array(
-            array(new Money('1', 'USD'), new Money('1', 'EUR')),
-        );
+        return [
+            [new Money('1', 'USD'), new Money('1', 'EUR')],
+        ];
     }
 
     /**
@@ -522,9 +525,9 @@ class MoneyTest extends TestCase
      */
     public function subExceptionProvider()
     {
-        return array(
-            array(new Money('1', 'USD'), new Money('1', 'EUR')),
-        );
+        return [
+            [new Money('1', 'USD'), new Money('1', 'EUR')],
+        ];
     }
 
     /**
@@ -534,9 +537,9 @@ class MoneyTest extends TestCase
      */
     public function divExceptionProvider()
     {
-        return array(
-            array(new Money('1', 'EUR')),
-        );
+        return [
+            [new Money('1', 'EUR')],
+        ];
     }
 
     /**
@@ -546,17 +549,17 @@ class MoneyTest extends TestCase
      */
     public function isEqualProvider()
     {
-        return array(
-            array(new Money('1', 'EUR'), new Money('1', 'EUR')),
-            array(new Money('1.0', 'EUR'), new Money('1', 'EUR')),
-            array(new Money('1.00100', 'EUR'), new Money('1.0010', 'EUR')),
-            array(new Money('-1', 'EUR'), new Money('-1', 'EUR')),
-            array(new Money('-1.0', 'EUR'), new Money('-1', 'EUR')),
-            array(new Money('-1.00100', 'EUR'), new Money('-1.00100', 'EUR')),
-            array(new Money('1', 'EUR'), new Money('1', 'EUR')),
-            array(new Money('0', 'USD'), new Money('0', 'EUR')),
-            array(new Money('0.00', 'USD'), new Money('0', 'EUR')),
-        );
+        return [
+            [new Money('1', 'EUR'), new Money('1', 'EUR')],
+            [new Money('1.0', 'EUR'), new Money('1', 'EUR')],
+            [new Money('1.00100', 'EUR'), new Money('1.0010', 'EUR')],
+            [new Money('-1', 'EUR'), new Money('-1', 'EUR')],
+            [new Money('-1.0', 'EUR'), new Money('-1', 'EUR')],
+            [new Money('-1.00100', 'EUR'), new Money('-1.00100', 'EUR')],
+            [new Money('1', 'EUR'), new Money('1', 'EUR')],
+            [new Money('0', 'USD'), new Money('0', 'EUR')],
+            [new Money('0.00', 'USD'), new Money('0', 'EUR')],
+        ];
     }
 
     /**
@@ -566,14 +569,14 @@ class MoneyTest extends TestCase
      */
     public function isGtProvider()
     {
-        return array(
-            array(new Money('0', 'EUR'), new Money('-1', 'EUR')),
-            array(new Money('1', 'USD'), new Money('0', 'USD')),
-            array(new Money('2', 'EUR'), new Money('1', 'EUR')),
-            array(new Money('2', 'EUR'), new Money('1.999999', 'EUR')),
-            array(new Money('1.00', 'EUR'), new Money('0.9999999', 'EUR')),
-            array(new Money('1.00', 'EUR'), new Money('0.99999999999999999', 'EUR')),
-        );
+        return [
+            [new Money('0', 'EUR'), new Money('-1', 'EUR')],
+            [new Money('1', 'USD'), new Money('0', 'USD')],
+            [new Money('2', 'EUR'), new Money('1', 'EUR')],
+            [new Money('2', 'EUR'), new Money('1.999999', 'EUR')],
+            [new Money('1.00', 'EUR'), new Money('0.9999999', 'EUR')],
+            [new Money('1.00', 'EUR'), new Money('0.99999999999999999', 'EUR')],
+        ];
     }
 
     /**
@@ -583,10 +586,10 @@ class MoneyTest extends TestCase
      */
     public function isGteProvider()
     {
-        return array(
-            array(new Money('1', 'EUR'), new Money('1', 'EUR')),
-            array(new Money('2', 'USD'), new Money('1', 'USD')),
-        );
+        return [
+            [new Money('1', 'EUR'), new Money('1', 'EUR')],
+            [new Money('2', 'USD'), new Money('1', 'USD')],
+        ];
     }
 
     /**
@@ -596,13 +599,13 @@ class MoneyTest extends TestCase
      */
     public function isLtProvider()
     {
-        return array(
-            array(new Money('-1', 'EUR'), new Money('0', 'EUR')),
-            array(new Money('0', 'USD'), new Money('1', 'USD')),
-            array(new Money('1', 'EUR'), new Money('2', 'EUR')),
-            array(new Money('0', 'EUR'), new Money('1', 'EUR')),
-            array(new Money('5', 'EUR'), new Money('6.55', 'EUR')),
-        );
+        return [
+            [new Money('-1', 'EUR'), new Money('0', 'EUR')],
+            [new Money('0', 'USD'), new Money('1', 'USD')],
+            [new Money('1', 'EUR'), new Money('2', 'EUR')],
+            [new Money('0', 'EUR'), new Money('1', 'EUR')],
+            [new Money('5', 'EUR'), new Money('6.55', 'EUR')],
+        ];
     }
 
     /**
@@ -612,13 +615,13 @@ class MoneyTest extends TestCase
      */
     public function isLteProvider()
     {
-        return array(
-            array(new Money('-1', 'EUR'), new Money('0', 'EUR')),
-            array(new Money('1', 'EUR'), new Money('1', 'EUR')),
-            array(new Money('1.00', 'EUR'), new Money('1', 'EUR')),
-            array(new Money('1.00100', 'EUR'), new Money('1.0010', 'EUR')),
-            array(new Money('1', 'USD'), new Money('2', 'USD')),
-        );
+        return [
+            [new Money('-1', 'EUR'), new Money('0', 'EUR')],
+            [new Money('1', 'EUR'), new Money('1', 'EUR')],
+            [new Money('1.00', 'EUR'), new Money('1', 'EUR')],
+            [new Money('1.00100', 'EUR'), new Money('1.0010', 'EUR')],
+            [new Money('1', 'USD'), new Money('2', 'USD')],
+        ];
     }
 
     /**
@@ -628,9 +631,9 @@ class MoneyTest extends TestCase
      */
     public function isGtExceptionProvider()
     {
-        return array(
-            array(new Money('1', 'USD'), new Money('1', 'EUR')),
-        );
+        return [
+            [new Money('1', 'USD'), new Money('1', 'EUR')],
+        ];
     }
 
     /**
@@ -640,9 +643,9 @@ class MoneyTest extends TestCase
      */
     public function isGteExceptionProvider()
     {
-        return array(
-            array(new Money('1', 'USD'), new Money('1', 'EUR')),
-        );
+        return [
+            [new Money('1', 'USD'), new Money('1', 'EUR')],
+        ];
     }
 
     /**
@@ -652,9 +655,9 @@ class MoneyTest extends TestCase
      */
     public function isLtExceptionProvider()
     {
-        return array(
-            array(new Money('1', 'USD'), new Money('1', 'EUR')),
-        );
+        return [
+            [new Money('1', 'USD'), new Money('1', 'EUR')],
+        ];
     }
 
     /**
@@ -664,9 +667,9 @@ class MoneyTest extends TestCase
      */
     public function isLteExceptionProvider()
     {
-        return array(
-            array(new Money('1', 'USD'), new Money('1', 'EUR')),
-        );
+        return [
+            [new Money('1', 'USD'), new Money('1', 'EUR')],
+        ];
     }
 
     /**
@@ -676,14 +679,14 @@ class MoneyTest extends TestCase
      */
     public function isSameCurrencyProvider()
     {
-        return array(
-            array(new Money('1', 'EUR'), new Money('1', 'EUR')),
-            array(new Money('1', 'EUR'), new Money('2', 'EUR')),
-            array(new Money('3', 'EUR'), new Money('3', 'EUR')),
-            array(new Money('1', 'USD'), new Money('1', 'USD')),
-            array(new Money('1', 'USD'), new Money('-1.01', 'USD')),
-            array(new Money('1', 'USD'), new Money('15', 'USD')),
-        );
+        return [
+            [new Money('1', 'EUR'), new Money('1', 'EUR')],
+            [new Money('1', 'EUR'), new Money('2', 'EUR')],
+            [new Money('3', 'EUR'), new Money('3', 'EUR')],
+            [new Money('1', 'USD'), new Money('1', 'USD')],
+            [new Money('1', 'USD'), new Money('-1.01', 'USD')],
+            [new Money('1', 'USD'), new Money('15', 'USD')],
+        ];
     }
 
     /**
@@ -693,12 +696,12 @@ class MoneyTest extends TestCase
      */
     public function negateProvider()
     {
-        return array(
-            array(new Money('1', 'EUR'), new Money('-1', 'EUR')),
-            array(new Money('-1', 'EUR'), new Money('1', 'EUR')),
-            array(new Money('-1.9910', 'EUR'), new Money('1.991', 'EUR')),
-            array(new Money('0', 'EUR'), new Money('0', 'EUR')),
-        );
+        return [
+            [new Money('1', 'EUR'), new Money('-1', 'EUR')],
+            [new Money('-1', 'EUR'), new Money('1', 'EUR')],
+            [new Money('-1.9910', 'EUR'), new Money('1.991', 'EUR')],
+            [new Money('0', 'EUR'), new Money('0', 'EUR')],
+        ];
     }
 
     /**
@@ -708,39 +711,39 @@ class MoneyTest extends TestCase
      */
     public function formatAmountProvider()
     {
-        return array(
-            array(new Money('0', 'EUR'), 0, '.', null, '0'),
-            array(new Money('0', 'EUR'), 1, '.', null, '0.0'),
-            array(new Money('0', 'EUR'), 2, '.', null, '0.00'),
-            array(new Money('0', 'EUR'), 2, '', null, '000'),
+        return [
+            [new Money('0', 'EUR'), 0, '.', null, '0'],
+            [new Money('0', 'EUR'), 1, '.', null, '0.0'],
+            [new Money('0', 'EUR'), 2, '.', null, '0.00'],
+            [new Money('0', 'EUR'), 2, '', null, '000'],
 
-            array(new Money('1', 'EUR'), 0, '.', null, '1'),
-            array(new Money('1', 'EUR'), 1, '.', null, '1.0'),
-            array(new Money('1', 'EUR'), 2, '.', null, '1.00'),
-            array(new Money('1', 'EUR'), 2, '', null, '100'),
+            [new Money('1', 'EUR'), 0, '.', null, '1'],
+            [new Money('1', 'EUR'), 1, '.', null, '1.0'],
+            [new Money('1', 'EUR'), 2, '.', null, '1.00'],
+            [new Money('1', 'EUR'), 2, '', null, '100'],
 
-            array(new Money('1.123', 'EUR'), 0, '.', null, '1'),
-            array(new Money('1.123', 'EUR'), 1, '.', null, '1.1'),
-            array(new Money('1.123', 'EUR'), 2, '.', null, '1.12'),
-            array(new Money('1.123', 'EUR'), 2, '', null, '112'),
-            array(new Money('1.123445', 'EUR'), 2, '.', null, '1.12'),
-            array(new Money('1.120000', 'EUR'), 2, '.', null, '1.12'),
+            [new Money('1.123', 'EUR'), 0, '.', null, '1'],
+            [new Money('1.123', 'EUR'), 1, '.', null, '1.1'],
+            [new Money('1.123', 'EUR'), 2, '.', null, '1.12'],
+            [new Money('1.123', 'EUR'), 2, '', null, '112'],
+            [new Money('1.123445', 'EUR'), 2, '.', null, '1.12'],
+            [new Money('1.120000', 'EUR'), 2, '.', null, '1.12'],
 
-            array(new Money('12.3', 'EUR'), 0, '', null, '12'),
-            array(new Money('12.3', 'EUR'), 1, '', null, '123'),
-            array(new Money('12.3', 'EUR'), 2, '', null, '1230'),
-            array(new Money('12.3', 'EUR'), 3, '', null, '12300'),
-            array(new Money('12', 'EUR'), 2, '', null, '1200'),
+            [new Money('12.3', 'EUR'), 0, '', null, '12'],
+            [new Money('12.3', 'EUR'), 1, '', null, '123'],
+            [new Money('12.3', 'EUR'), 2, '', null, '1230'],
+            [new Money('12.3', 'EUR'), 3, '', null, '12300'],
+            [new Money('12', 'EUR'), 2, '', null, '1200'],
 
-            array(new Money('1200.3', 'EUR'), 3, '', null, '1200300'),
-            array(new Money('1200', 'EUR'), 2, '', null, '120000'),
-            array(new Money('1200.3', 'EUR'), 3, '', ',', '1,200300'),
-            array(new Money('1200.3', 'EUR'), 3, '.', ',', '1,200.300'),
-            array(new Money('1200.3', 'EUR'), 3, ':', '/', '1/200:300'),
-            array(new Money('1200', 'EUR'), 2, '', ',', '1,20000'),
+            [new Money('1200.3', 'EUR'), 3, '', null, '1200300'],
+            [new Money('1200', 'EUR'), 2, '', null, '120000'],
+            [new Money('1200.3', 'EUR'), 3, '', ',', '1,200300'],
+            [new Money('1200.3', 'EUR'), 3, '.', ',', '1,200.300'],
+            [new Money('1200.3', 'EUR'), 3, ':', '/', '1/200:300'],
+            [new Money('1200', 'EUR'), 2, '', ',', '1,20000'],
 
-            array(new Money('1200.01', 'BYR'), 0, ',', null, '1200'),
-        );
+            [new Money('1200.01', 'BYR'), 0, ',', null, '1200'],
+        ];
     }
 
     /**
@@ -750,15 +753,15 @@ class MoneyTest extends TestCase
      */
     public function ceilProvider()
     {
-        return array(
-            array(new Money('10.548', 'EUR'), new Money('10.55', 'EUR'), null),
-            array(new Money('35', 'EUR'), new Money('35', 'EUR'), null),
-            array(new Money('35.13', 'EUR'), new Money('35.13', 'EUR'), null),
-            array(new Money('-10.548', 'EUR'), new Money('-10.54', 'EUR'), null),
-            array(new Money('0.01', 'EUR'), new Money('0.01', 'EUR'), null),
-            array(new Money('4.12', 'EUR'), new Money('5', 'EUR'), 0),
-            array(new Money('8.88', 'EUR'), new Money('9', 'EUR'), 0),
-        );
+        return [
+            [new Money('10.548', 'EUR'), new Money('10.55', 'EUR'), null],
+            [new Money('35', 'EUR'), new Money('35', 'EUR'), null],
+            [new Money('35.13', 'EUR'), new Money('35.13', 'EUR'), null],
+            [new Money('-10.548', 'EUR'), new Money('-10.54', 'EUR'), null],
+            [new Money('0.01', 'EUR'), new Money('0.01', 'EUR'), null],
+            [new Money('4.12', 'EUR'), new Money('5', 'EUR'), 0],
+            [new Money('8.88', 'EUR'), new Money('9', 'EUR'), 0],
+        ];
     }
 
     /**
@@ -768,15 +771,15 @@ class MoneyTest extends TestCase
      */
     public function floorProvider()
     {
-        return array(
-            array(new Money('10.548', 'EUR'), new Money('10.54', 'EUR'), null),
-            array(new Money('35', 'EUR'), new Money('35', 'EUR'), null),
-            array(new Money('35.12', 'EUR'), new Money('35.12', 'EUR'), null),
-            array(new Money('-10.548', 'EUR'), new Money('-10.55', 'EUR'), null),
-            array(new Money('0.01', 'EUR'), new Money('0.01', 'EUR'), null),
-            array(new Money('1.15', 'EUR'), new Money('1', 'EUR'), 0),
-            array(new Money('2.99', 'EUR'), new Money('2', 'EUR'), 0),
-        );
+        return [
+            [new Money('10.548', 'EUR'), new Money('10.54', 'EUR'), null],
+            [new Money('35', 'EUR'), new Money('35', 'EUR'), null],
+            [new Money('35.12', 'EUR'), new Money('35.12', 'EUR'), null],
+            [new Money('-10.548', 'EUR'), new Money('-10.55', 'EUR'), null],
+            [new Money('0.01', 'EUR'), new Money('0.01', 'EUR'), null],
+            [new Money('1.15', 'EUR'), new Money('1', 'EUR'), 0],
+            [new Money('2.99', 'EUR'), new Money('2', 'EUR'), 0],
+        ];
     }
 
     /**
@@ -786,12 +789,12 @@ class MoneyTest extends TestCase
      */
     public function roundProvider()
     {
-        return array(
-            array(new Money('10.544', 'EUR'), new Money('10.54', 'EUR')),
-            array(new Money('-10.544', 'EUR'), new Money('-10.54', 'EUR')),
-            array(new Money('10.545', 'EUR'), new Money('10.55', 'EUR')),
-            array(new Money('-10.545', 'EUR'), new Money('-10.55', 'EUR')),
-        );
+        return [
+            [new Money('10.544', 'EUR'), new Money('10.54', 'EUR')],
+            [new Money('-10.544', 'EUR'), new Money('-10.54', 'EUR')],
+            [new Money('10.545', 'EUR'), new Money('10.55', 'EUR')],
+            [new Money('-10.545', 'EUR'), new Money('-10.55', 'EUR')],
+        ];
     }
 
     /**
@@ -801,12 +804,12 @@ class MoneyTest extends TestCase
      */
     public function getAsStringProvider()
     {
-        return array(
-            array(new Money('1', 'EUR'), '1.00 EUR'),
-            array(new Money('1.123456', 'EUR'), '1.12 EUR'),
-            array(new Money('1.120000', 'EUR'), '1.12 EUR'),
-            array(new Money('-1.120001', 'EUR'), '-1.12 EUR'),
-        );
+        return [
+            [new Money('1', 'EUR'), '1.00 EUR'],
+            [new Money('1.123456', 'EUR'), '1.12 EUR'],
+            [new Money('1.120000', 'EUR'), '1.12 EUR'],
+            [new Money('-1.120001', 'EUR'), '-1.12 EUR'],
+        ];
     }
 
     /**
@@ -816,10 +819,10 @@ class MoneyTest extends TestCase
      */
     public function createFromNonDelimiterProvider()
     {
-        return array(
-            array('100', 'EUR', new Money('1', 'EUR')),
-            array('0', 'EUR', new Money('0', 'EUR'))
-        );
+        return [
+            ['100', 'EUR', new Money('1', 'EUR')],
+            ['0', 'EUR', new Money('0', 'EUR')]
+        ];
     }
 
     /**
@@ -829,10 +832,10 @@ class MoneyTest extends TestCase
      */
     public function createZeroProvider()
     {
-        return array(
-            array('USD', new Money('0', 'USD')),
-            array('EUR', new Money('0', 'EUR')),
-        );
+        return [
+            ['USD', new Money('0', 'USD')],
+            ['EUR', new Money('0', 'EUR')],
+        ];
     }
 
     /**
@@ -842,22 +845,22 @@ class MoneyTest extends TestCase
      */
     public function sameAmountProvider()
     {
-        return array(
-            array('0', 'EUR'),
-            array('-0', 'EUR'),
-            array('+0', 'EUR'),
-            array('-0.000', 'EUR'),
-            array('+0.000', 'EUR'),
-            array('0.123', 'EUR'),
-            array('-0', 'EUR'),
-            array('+0', 'EUR'),
-            array('123.991', 'EUR'),
-            array('12.21', 'EUR'),
-            array('12', 'EUR'),
-            array('-12', 'EUR'),
-            array('+12', 'EUR'),
-            array('12.000000', 'EUR'),
-        );
+        return [
+            ['0', 'EUR'],
+            ['-0', 'EUR'],
+            ['+0', 'EUR'],
+            ['-0.000', 'EUR'],
+            ['+0.000', 'EUR'],
+            ['0.123', 'EUR'],
+            ['-0', 'EUR'],
+            ['+0', 'EUR'],
+            ['123.991', 'EUR'],
+            ['12.21', 'EUR'],
+            ['12', 'EUR'],
+            ['-12', 'EUR'],
+            ['+12', 'EUR'],
+            ['12.000000', 'EUR'],
+        ];
     }
 
     /**
@@ -867,61 +870,61 @@ class MoneyTest extends TestCase
      */
     public function setAmountExceptionProvider()
     {
-        return array(
-            array('0+', 'EUR'),
-            array('0-', 'EUR'),
-            array('0.00+', 'EUR'),
-            array('0.00-', 'EUR'),
-            array('0.0+001', 'EUR'),
-            array('0.0-001', 'EUR'),
-            array('1+.-1', 'EUR'),
-            array('1-1', 'EUR'),
-            array('1.', 'EUR'),
-            array('10.', 'EUR'),
-            array('0LTL', 'EUR'),
-            array('0.00LTL', 'EUR'),
-            array('0.0EUR001', 'EUR'),
-            array('LTL', 'EUR'),
-            array('.0', 'EUR'),
-            array('U.0', 'EUR'),
-            array('-1.E1', 'EUR'),
-            array('+1.100000000000E1', 'EUR'),
-            array('1.22222222222222E+E', 'EUR'),
-            array('+1.100000000000e1', 'EUR'),
-            array('1.22222222222222e+e', 'EUR'),
-        );
+        return [
+            ['0+', 'EUR'],
+            ['0-', 'EUR'],
+            ['0.00+', 'EUR'],
+            ['0.00-', 'EUR'],
+            ['0.0+001', 'EUR'],
+            ['0.0-001', 'EUR'],
+            ['1+.-1', 'EUR'],
+            ['1-1', 'EUR'],
+            ['1.', 'EUR'],
+            ['10.', 'EUR'],
+            ['0LTL', 'EUR'],
+            ['0.00LTL', 'EUR'],
+            ['0.0EUR001', 'EUR'],
+            ['LTL', 'EUR'],
+            ['.0', 'EUR'],
+            ['U.0', 'EUR'],
+            ['-1.E1', 'EUR'],
+            ['+1.100000000000E1', 'EUR'],
+            ['1.22222222222222E+E', 'EUR'],
+            ['+1.100000000000e1', 'EUR'],
+            ['1.22222222222222e+e', 'EUR'],
+        ];
     }
 
     public function amountInMinorUnitsTestProvider()
     {
-        return array(
-            array(new Money('1', 'EUR'), 100),
-            array(new Money('-1', 'EUR'), -100),
-            array(new Money('1', 'BYR'), 1),
-            array(new Money('-1', 'BYR'), -1),
-            array(new Money('1', 'MGA'), 10),
-            array(new Money('-1', 'MGA'), -10),
-            array(new Money('1', 'KWD'), 1000),
-            array(new Money('-1', 'KWD'), -1000),
-            array(new Money('1', 'XAU'), 100000),
-            array(new Money('-1', 'XAU'), -100000),
-        );
+        return [
+            [new Money('1', 'EUR'), 100],
+            [new Money('-1', 'EUR'), -100],
+            [new Money('1', 'BYR'), 1],
+            [new Money('-1', 'BYR'), -1],
+            [new Money('1', 'MGA'), 10],
+            [new Money('-1', 'MGA'), -10],
+            [new Money('1', 'KWD'), 1000],
+            [new Money('-1', 'KWD'), -1000],
+            [new Money('1', 'XAU'), 100000],
+            [new Money('-1', 'XAU'), -100000],
+        ];
     }
 
     public function createAmountInMinorUnitsTestProvider()
     {
-        return array(
-            array(new Money('0.01', 'EUR'), 1, 'EUR'),
-            array(new Money('-0.01', 'EUR'), -1, 'EUR'),
-            array(new Money('1', 'JPY'), 1, 'JPY'),
-            array(new Money('-1', 'JPY'), -1, 'JPY'),
-            array(new Money('0.100000', 'MGA'), 1, 'MGA'),
-            array(new Money('-0.100000', 'MGA'), -1, 'MGA'),
-            array(new Money('0.001000', 'KWD'), 1, 'KWD'),
-            array(new Money('-0.001000', 'KWD'), -1, 'KWD'),
-            array(new Money('0.000010', 'XAU'), 1, 'XAU'),
-            array(new Money('-0.000010', 'XAU'), -1, 'XAU'),
-        );
+        return [
+            [new Money('0.01', 'EUR'), 1, 'EUR'],
+            [new Money('-0.01', 'EUR'), -1, 'EUR'],
+            [new Money('1', 'JPY'), 1, 'JPY'],
+            [new Money('-1', 'JPY'), -1, 'JPY'],
+            [new Money('0.100000', 'MGA'), 1, 'MGA'],
+            [new Money('-0.100000', 'MGA'), -1, 'MGA'],
+            [new Money('0.001000', 'KWD'), 1, 'KWD'],
+            [new Money('-0.001000', 'KWD'), -1, 'KWD'],
+            [new Money('0.000010', 'XAU'), 1, 'XAU'],
+            [new Money('-0.000010', 'XAU'), -1, 'XAU'],
+        ];
     }
 
     /**
@@ -931,10 +934,10 @@ class MoneyTest extends TestCase
      */
     public function unsupportedCurrencyProvider()
     {
-        return array(
-            array(1, 'XXX'),
-            array(null, 'XXX'),
-        );
+        return [
+            [1, 'XXX'],
+            [null, 'XXX'],
+        ];
     }
 
     /**
@@ -951,29 +954,253 @@ class MoneyTest extends TestCase
 
     public function absProvider()
     {
-        return array(
-            array('0.000005', '0.000005'),
-            array('0.000005', '-0.000005'),
-        );
+        return [
+            ['0.000005', '0.000005'],
+            ['0.000005', '-0.000005'],
+        ];
     }
 
     public function clearAmountValueProvider()
     {
-        return array(
-            array('1.', '1'),
-            array('.1', '0.1'),
-            array('1', '1'),
-            array('1..1', '1.1'),
-            array('0.00001', '0.00001'),
-            array('0.000000000000001', '0.000000000000001'),
-            array('1233.123456778742433245632234234', '1233.123456778742433245632234234'),
-            array('123456778742433245632234234.00000122223213', '123456778742433245632234234.00000122223213'),
-            array('10 000,01', '10000.01'),
-            array('10.000,01', '10000.01'),
-            array('10,000.01', '10000.01'),
-            array('10.000.000,01', '10000000.01'),
-            array('10,000,000.01', '10000000.01'),
-            array('11111111111111.111111', '11111111111111.111111'),
-        );
+        return [
+            ['1.', '1'],
+            ['.1', '0.1'],
+            ['1', '1'],
+            ['1..1', '1.1'],
+            ['0.00001', '0.00001'],
+            ['0.000000000000001', '0.000000000000001'],
+            ['1233.123456778742433245632234234', '1233.123456778742433245632234234'],
+            ['123456778742433245632234234.00000122223213', '123456778742433245632234234.00000122223213'],
+            ['10 000,01', '10000.01'],
+            ['10.000,01', '10000.01'],
+            ['10,000.01', '10000.01'],
+            ['10.000.000,01', '10000000.01'],
+            ['10,000,000.01', '10000000.01'],
+            ['11111111111111.111111', '11111111111111.111111'],
+        ];
+    }
+
+    public function testAnAmountWithTwoDecimalSeparatorsIsRejected()
+    {
+        $this->expectException(MoneyException::class);
+        $this->expectExceptionMessage('Invalid amount: 1.2.3');
+
+        new Money('1.2.3', 'EUR');
+    }
+
+    /**
+     * @param string|null $amount
+     * @param string|int|null $expected
+     *
+     * @dataProvider amountGettersProvider
+     */
+    public function testAmountGetters(string $method, $amount, $expected)
+    {
+        $this->assertSame($expected, (new Money($amount, 'EUR'))->$method());
+    }
+
+    /**
+     * @return array[]
+     */
+    public function amountGettersProvider()
+    {
+        return [
+            'an empty amount means no amount' => ['getAmount', '', null],
+            'amount in cents' => ['getAmountInCents', '10.50', 1050],
+            'a fraction of a cent is dropped' => ['getAmountInCents', '0.019', 1],
+            'negative amount in cents' => ['getAmountInCents', '-3', -300],
+            'no amount has no cents' => ['getAmountInCents', null, null],
+            'no amount has no minor units' => ['getAmountInMinorUnits', null, null],
+        ];
+    }
+
+    /**
+     * @dataProvider integerGetterProvider
+     */
+    public function testAmountsTooLargeForAnIntegerAreRejected(string $method)
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Amount is too large to be returned as integer');
+
+        (new Money('100000000000000000000', 'EUR'))->$method();
+    }
+
+    /**
+     * @return array[]
+     */
+    public function integerGetterProvider()
+    {
+        return [
+            ['getAmountInCents'],
+            ['getAmountInMinorUnits'],
+        ];
+    }
+
+    /**
+     * @param int|string $amount
+     *
+     * @dataProvider createFromCentsAndNoDelimiterAmountProvider
+     */
+    public function testCreateFromCentsAndNoDelimiterAmount(string $method, $amount, Money $expected)
+    {
+        $this->assertEquals($expected, Money::$method($amount, 'EUR'));
+    }
+
+    /**
+     * @return array[]
+     */
+    public function createFromCentsAndNoDelimiterAmountProvider()
+    {
+        return [
+            'cents' => ['createFromCents', 1050, new Money('10.500000', 'EUR')],
+            'negative cents as a string' => ['createFromCents', '-5', new Money('-0.050000', 'EUR')],
+            'negative amount without delimiter' => ['createFromNoDelimiterAmount', '-1234', new Money('-12.34', 'EUR')],
+            'negative amount below one without delimiter' => [
+                'createFromNoDelimiterAmount',
+                '-5',
+                new Money('-0.05', 'EUR'),
+            ],
+        ];
+    }
+
+    /**
+     * @param string|null $amount
+     * @param string|null $expected
+     *
+     * @dataProvider createFromAnEmptyValueProvider
+     */
+    public function testCreateFromAnEmptyValue(string $method, $amount, $expected)
+    {
+        $this->assertSame($expected, Money::$method($amount, 'EUR')->getAmount());
+    }
+
+    /**
+     * @return array[]
+     */
+    public function createFromAnEmptyValueProvider()
+    {
+        return [
+            'no cents' => ['createFromCents', null, null],
+            'empty amount without delimiter' => ['createFromNoDelimiterAmount', '', '0.00'],
+        ];
+    }
+
+    /**
+     * @dataProvider createFromIntegerUnitsProvider
+     */
+    public function testCreateFromCentsOrMinorUnitsRejectsANonInteger(string $method)
+    {
+        $this->expectException(MoneyException::class);
+        $this->expectExceptionMessage('Amount must be integer');
+
+        Money::$method('10.5', 'EUR');
+    }
+
+    /**
+     * @return array[]
+     */
+    public function createFromIntegerUnitsProvider()
+    {
+        return [
+            ['createFromCents'],
+            ['createFromMinorUnits'],
+        ];
+    }
+
+    public function testCheckReturnsTheSameMoneyWhenTheCurrencyHasEnoughDecimals()
+    {
+        $money = new Money('10.50', 'EUR');
+
+        $this->assertSame($money, $money->check());
+    }
+
+    public function testCheckRejectsMoreDecimalsThanTheCurrencyHas()
+    {
+        $this->expectException(MoneyException::class);
+        $this->expectExceptionMessage('Too small fraction for the amount specified');
+
+        (new Money('10.555', 'EUR'))->check();
+    }
+
+    public function testTheSameNonZeroAmountInAnotherCurrencyIsNotEqual()
+    {
+        $this->assertFalse((new Money('1', 'EUR'))->isEqual(new Money('1', 'USD')));
+    }
+
+    /**
+     * @dataProvider isPositiveProvider
+     */
+    public function testIsPositive(string $amount, bool $expected)
+    {
+        $this->assertSame($expected, (new Money($amount, 'EUR'))->isPositive());
+    }
+
+    /**
+     * @return array[]
+     */
+    public function isPositiveProvider()
+    {
+        return [
+            ['0.01', true],
+            ['0', false],
+            ['-0.01', false],
+        ];
+    }
+
+    /**
+     * @param int|null $fraction
+     * @param array<string, string> $expected
+     *
+     * @dataProvider getArrayRepresentationProvider
+     */
+    public function testGetArrayRepresentation(
+        string $amount,
+        string $currency,
+        $fraction,
+        string $separator,
+        array $expected
+    ) {
+        $this->assertSame($expected, (new Money($amount, $currency))->getArrayRepresentation($fraction, $separator));
+    }
+
+    /**
+     * @return array[]
+     */
+    public function getArrayRepresentationProvider()
+    {
+        return [
+            'decimals of the currency' => [
+                '10.5',
+                'EUR',
+                null,
+                '.',
+                ['amount' => '10.50', 'currency' => 'EUR'],
+            ],
+            'given fraction and separator' => [
+                '10.5',
+                'EUR',
+                3,
+                ',',
+                ['amount' => '10,500', 'currency' => 'EUR'],
+            ],
+            'currency without decimals' => ['7', 'JPY', null, '.', ['amount' => '7', 'currency' => 'JPY']],
+        ];
+    }
+
+    public function testGetFractionRejectsAnUnsupportedCurrency()
+    {
+        $this->expectException(MoneyException::class);
+        $this->expectExceptionMessage('Unsupported currency: ZZZ');
+
+        Money::getFraction('zzz');
+    }
+
+    public function testSerializedFormIsStable()
+    {
+        $stored = 'O:25:"Evp\Component\Money\Money":2:{s:9:"' . "\0*\0" . 'amount";s:11:"1200.000000";'
+            . 's:11:"' . "\0*\0" . 'currency";s:3:"EUR";}';
+
+        $this->assertEquals(new Money('1200.000000', 'EUR'), unserialize($stored));
+        $this->assertSame($stored, serialize(new Money('1200.000000', 'EUR')));
     }
 }

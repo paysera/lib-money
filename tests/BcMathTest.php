@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Evp\Component\Money\Tests;
 
 use Evp\Component\Money\BcMath;
+use Exception;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class BcMathTest extends TestCase
@@ -125,16 +128,16 @@ class BcMathTest extends TestCase
      */
     public function addProvider()
     {
-        return array(
-            array('1', '1', '2'),
-            array('-1', '-1', '-2'),
-            array('1', '-1', '0'),
-            array('-1', '1', '0'),
-            array('0.5', '0.5', '1'),
-            array('-0.5', '-0.5', '-1'),
-            array('-0.5', '0', '-0.5'),
-            array('-0', '0', '0'),
-        );
+        return [
+            ['1', '1', '2'],
+            ['-1', '-1', '-2'],
+            ['1', '-1', '0'],
+            ['-1', '1', '0'],
+            ['0.5', '0.5', '1'],
+            ['-0.5', '-0.5', '-1'],
+            ['-0.5', '0', '-0.5'],
+            ['-0', '0', '0'],
+        ];
     }
 
     /**
@@ -144,16 +147,16 @@ class BcMathTest extends TestCase
      */
     public function subProvider()
     {
-        return array(
-            array('1', '1', '0'),
-            array('-1', '-1', '0'),
-            array('1', '-1', '2'),
-            array('-1', '1', '-2'),
-            array('0.5', '0.5', '0'),
-            array('-0.5', '-0.5', '0'),
-            array('-0.5', '0', '-0.5'),
-            array('-0', '0', '0'),
-        );
+        return [
+            ['1', '1', '0'],
+            ['-1', '-1', '0'],
+            ['1', '-1', '2'],
+            ['-1', '1', '-2'],
+            ['0.5', '0.5', '0'],
+            ['-0.5', '-0.5', '0'],
+            ['-0.5', '0', '-0.5'],
+            ['-0', '0', '0'],
+        ];
     }
 
     /**
@@ -163,16 +166,16 @@ class BcMathTest extends TestCase
      */
     public function mulProvider()
     {
-        return array(
-            array('1', '1', '1'),
-            array('-1', '-1', '1'),
-            array('1', '-1', '-1'),
-            array('-1', '1', '-1'),
-            array('0.5', '0.5', '0.25'),
-            array('-0.5', '-0.5', '0.25'),
-            array('-0.5', '0', '0'),
-            array('-0', '0', '0'),
-        );
+        return [
+            ['1', '1', '1'],
+            ['-1', '-1', '1'],
+            ['1', '-1', '-1'],
+            ['-1', '1', '-1'],
+            ['0.5', '0.5', '0.25'],
+            ['-0.5', '-0.5', '0.25'],
+            ['-0.5', '0', '0'],
+            ['-0', '0', '0'],
+        ];
     }
 
     /**
@@ -182,17 +185,17 @@ class BcMathTest extends TestCase
      */
     public function divProvider()
     {
-        return array(
-            array('1', '1', '1'),
-            array('1', '2', '0.5'),
-            array('1', '3', '0.333333'),
-            array('-1', '-1', '1'),
-            array('1', '-1', '-1'),
-            array('-1', '1', '-1'),
-            array('0.5', '0.5', '1'),
-            array('-0.5', '-0.5', '1'),
-            array('35', '3.5', '10'),
-        );
+        return [
+            ['1', '1', '1'],
+            ['1', '2', '0.5'],
+            ['1', '3', '0.333333'],
+            ['-1', '-1', '1'],
+            ['1', '-1', '-1'],
+            ['-1', '1', '-1'],
+            ['0.5', '0.5', '1'],
+            ['-0.5', '-0.5', '1'],
+            ['35', '3.5', '10'],
+        ];
     }
 
     /**
@@ -202,19 +205,19 @@ class BcMathTest extends TestCase
      */
     public function ceilProvider()
     {
-        return array(
-            array('10.5481', 3, '10.549'),
-            array('35', 2, '35'),
-            array('-10.548', 2, '-10.54'),
-            array('10.444444', 0, '11'),
-            array('10.999999', 0, '11'),
-            array('10.0000', 0, '10'),
-            array('10.0001', 0, '11'),
-            array('10.000001', 0, '11'),
-            array('10.0000001', 0, '10'), // Exceeds default scale = 6
-            array('0', 0, '0'),
-            array('0', 8, '0'),
-        );
+        return [
+            ['10.5481', 3, '10.549'],
+            ['35', 2, '35'],
+            ['-10.548', 2, '-10.54'],
+            ['10.444444', 0, '11'],
+            ['10.999999', 0, '11'],
+            ['10.0000', 0, '10'],
+            ['10.0001', 0, '11'],
+            ['10.000001', 0, '11'],
+            ['10.0000001', 0, '10'], // Exceeds default scale = 6
+            ['0', 0, '0'],
+            ['0', 8, '0'],
+        ];
     }
 
     /**
@@ -224,24 +227,24 @@ class BcMathTest extends TestCase
      */
     public function floorProvider()
     {
-        return array(
-            array('10.5489', 3, '10.548'),
-            array('35', 2, '35'),
-            array('-10.548', 2, '-10.55'),
-            array('10.444444', 0, '10'),
-            array('10.999999', 0, '10'),
-            array('10.0000', 0, '10'),
-            array('10.0009', 0, '10'),
-            array('10.000009', 0, '10'),
-            array('10.0000001', 0, '10'),
-            array('-10.548', 3, '-10.548'),
-            array('10.548', 3, '10.548'),
-            array('-10548', 0, '-10548'),
-            array('10548', 0, '10548'),
-            array('0', 0, '0'),
-            array('0', 5, '0'),
-            array('0.00', 3, '0'),
-        );
+        return [
+            ['10.5489', 3, '10.548'],
+            ['35', 2, '35'],
+            ['-10.548', 2, '-10.55'],
+            ['10.444444', 0, '10'],
+            ['10.999999', 0, '10'],
+            ['10.0000', 0, '10'],
+            ['10.0009', 0, '10'],
+            ['10.000009', 0, '10'],
+            ['10.0000001', 0, '10'],
+            ['-10.548', 3, '-10.548'],
+            ['10.548', 3, '10.548'],
+            ['-10548', 0, '-10548'],
+            ['10548', 0, '10548'],
+            ['0', 0, '0'],
+            ['0', 5, '0'],
+            ['0.00', 3, '0'],
+        ];
     }
 
     /**
@@ -251,18 +254,51 @@ class BcMathTest extends TestCase
      */
     public function roundProvider()
     {
-        return array(
-            array('10.544', 2, '10.54'),
-            array('-10.544', 2, '-10.54'),
-            array('10.545', 2, '10.55'),
-            array('10.444444', 0, '10'),
-            array('10.488888', 0, '10'),
-            array('10.588888', 0, '11'),
-            array('10.000000', 6, '10.000000'),
-            array('10.0000555', 6, '10.000056'),
-            array('10.000055565', 8, '10.00005557'),
-            array('0', 0, '0'),
-            array('0', 8, '0'),
-        );
+        return [
+            ['10.544', 2, '10.54'],
+            ['-10.544', 2, '-10.54'],
+            ['10.545', 2, '10.55'],
+            ['10.444444', 0, '10'],
+            ['10.488888', 0, '10'],
+            ['10.588888', 0, '11'],
+            ['10.000000', 6, '10.000000'],
+            ['10.0000555', 6, '10.000056'],
+            ['10.000055565', 8, '10.00005557'],
+            ['0', 0, '0'],
+            ['0', 8, '0'],
+        ];
+    }
+
+    /**
+     * @param mixed $rightOperand
+     *
+     * @dataProvider zeroDivisorProvider
+     */
+    public function testDivisionByZeroIsRejected($rightOperand)
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Right operand is empty/zero!');
+
+        $this->math->div('1', $rightOperand);
+    }
+
+    /**
+     * @return array[]
+     */
+    public function zeroDivisorProvider()
+    {
+        return [
+            ['0'],
+            [''],
+            [0],
+            ['0.00'],
+            ['-0'],
+        ];
+    }
+
+    public function testScale()
+    {
+        $this->assertSame(6, $this->math->getScale());
+        $this->assertSame(2, $this->math->setScale(2)->getScale());
     }
 }
