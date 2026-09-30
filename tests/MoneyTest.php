@@ -821,7 +821,7 @@ class MoneyTest extends TestCase
     {
         return [
             ['100', 'EUR', new Money('1', 'EUR')],
-            ['0', 'EUR', new Money('0', 'EUR')]
+            ['0', 'EUR', new Money('0', 'EUR')],
         ];
     }
 
