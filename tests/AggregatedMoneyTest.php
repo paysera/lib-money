@@ -34,7 +34,7 @@ class AggregatedMoneyTest extends TestCase
             [new Money('1', 'EUR'), new Money('2', 'EUR'), new Money('3', 'EUR')],
             [new Money('-10', 'EUR'), new Money('2', 'EUR'), new Money('-8', 'EUR')],
             [new Money('-10', 'EUR'), new Money('-10', 'EUR'), new Money('-20', 'EUR')],
-            [new Money('1', 'EUR'), new Money('-2', 'EUR'), new Money('-1', 'EUR')]
+            [new Money('1', 'EUR'), new Money('-2', 'EUR'), new Money('-1', 'EUR')],
         ];
     }
 
