@@ -78,9 +78,9 @@ jobs:
         run: >-
           composer require --no-update
           symfony/dependency-injection:${{ matrix.constraint }}
-          symfony/config:'${{ matrix.symfony }}'
-          symfony/property-access:'${{ matrix.symfony }}'
-          symfony/validator:'${{ matrix.symfony }}'
+          symfony/config:${{ matrix.constraint }}
+          symfony/property-access:${{ matrix.constraint }}
+          symfony/validator:${{ matrix.constraint }}
 
       - name: Install dependencies
         uses: ramsey/composer-install@v2
