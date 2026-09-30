@@ -83,7 +83,10 @@ class MoneyNormalizerTest extends TestCase
             'no amount' => [['currency' => 'EUR'], 'Amount is not set'],
             'no currency' => [['amount' => '1'], 'Currency is not set'],
             'not a number' => [['amount' => '1.2.3', 'currency' => 'EUR'], 'Invalid amount specified'],
-            'unknown currency' => [['amount' => '1', 'currency' => 'ZZZ'], 'Invalid amount specified'],
+            'unknown currency, reported as an invalid amount' => [
+                ['amount' => '1', 'currency' => 'ZZZ'],
+                'Invalid amount specified',
+            ],
             'more decimals than the currency has' => [
                 ['amount' => '10.555', 'currency' => 'EUR'],
                 'Too small fraction for the amount specified',
