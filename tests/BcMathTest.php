@@ -3,6 +3,7 @@
 namespace Evp\Component\Money\Tests;
 
 use Evp\Component\Money\BcMath;
+use Exception;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class BcMathTest extends TestCase
@@ -273,7 +274,7 @@ class BcMathTest extends TestCase
      */
     public function testDivisionByZeroIsRejected($rightOperand)
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $this->expectExceptionMessage('Right operand is empty/zero!');
 
         $this->math->div('1', $rightOperand);

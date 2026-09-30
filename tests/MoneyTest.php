@@ -7,6 +7,7 @@ use Evp\Component\Money\MoneyException;
 use Exception;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 class MoneyTest extends TestCase
 {
@@ -1019,7 +1020,7 @@ class MoneyTest extends TestCase
      */
     public function testAmountsTooLargeForAnIntegerAreRejected($method)
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Amount is too large to be returned as integer');
 
         (new Money('100000000000000000000', 'EUR'))->$method();
