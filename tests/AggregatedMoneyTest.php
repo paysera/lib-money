@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Evp\Component\Money\Tests;
 
 use Evp\Component\Money\AggregatedMoney;
