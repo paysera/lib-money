@@ -1037,16 +1037,13 @@ class MoneyTest extends TestCase
     }
 
     /**
-     * @param int|string|null $amount
-     * @param array<string, string|null> $expected
+     * @param int|string $amount
      *
      * @dataProvider createFromCentsAndNoDelimiterAmountProvider
      */
-    public function testCreateFromCentsAndNoDelimiterAmount(string $method, $amount, array $expected)
+    public function testCreateFromCentsAndNoDelimiterAmount(string $method, $amount, Money $expected)
     {
-        $money = Money::$method($amount, 'EUR');
-
-        $this->assertSame($expected, ['amount' => $money->getAmount(), 'currency' => $money->getCurrency()]);
+        $this->assertEquals($expected, Money::$method($amount, 'EUR'));
     }
 
     /**
@@ -1055,28 +1052,36 @@ class MoneyTest extends TestCase
     public function createFromCentsAndNoDelimiterAmountProvider()
     {
         return [
-            'cents' => ['createFromCents', 1050, ['amount' => '10.500000', 'currency' => 'EUR']],
-            'negative cents as a string' => [
-                'createFromCents',
-                '-5',
-                ['amount' => '-0.050000', 'currency' => 'EUR'],
-            ],
-            'no cents' => ['createFromCents', null, ['amount' => null, 'currency' => 'EUR']],
-            'empty amount without delimiter' => [
-                'createFromNoDelimiterAmount',
-                '',
-                ['amount' => '0.00', 'currency' => 'EUR'],
-            ],
-            'negative amount without delimiter' => [
-                'createFromNoDelimiterAmount',
-                '-1234',
-                ['amount' => '-12.34', 'currency' => 'EUR'],
-            ],
+            'cents' => ['createFromCents', 1050, new Money('10.500000', 'EUR')],
+            'negative cents as a string' => ['createFromCents', '-5', new Money('-0.050000', 'EUR')],
+            'negative amount without delimiter' => ['createFromNoDelimiterAmount', '-1234', new Money('-12.34', 'EUR')],
             'negative amount below one without delimiter' => [
                 'createFromNoDelimiterAmount',
                 '-5',
-                ['amount' => '-0.05', 'currency' => 'EUR'],
+                new Money('-0.05', 'EUR'),
             ],
+        ];
+    }
+
+    /**
+     * @param string|null $amount
+     * @param string|null $expected
+     *
+     * @dataProvider createFromAnEmptyValueProvider
+     */
+    public function testCreateFromAnEmptyValue(string $method, $amount, $expected)
+    {
+        $this->assertSame($expected, Money::$method($amount, 'EUR')->getAmount());
+    }
+
+    /**
+     * @return array[]
+     */
+    public function createFromAnEmptyValueProvider()
+    {
+        return [
+            'no cents' => ['createFromCents', null, null],
+            'empty amount without delimiter' => ['createFromNoDelimiterAmount', '', '0.00'],
         ];
     }
 
@@ -1195,13 +1200,7 @@ class MoneyTest extends TestCase
         $stored = 'O:25:"Evp\Component\Money\Money":2:{s:9:"' . "\0*\0" . 'amount";s:11:"1200.000000";'
             . 's:11:"' . "\0*\0" . 'currency";s:3:"EUR";}';
 
-        $money = unserialize($stored);
-
-        $this->assertInstanceOf(Money::class, $money);
-        $this->assertSame(
-            ['amount' => '1200.000000', 'currency' => 'EUR'],
-            ['amount' => $money->getAmount(), 'currency' => $money->getCurrency()]
-        );
+        $this->assertEquals(new Money('1200.000000', 'EUR'), unserialize($stored));
         $this->assertSame($stored, serialize(new Money('1200.000000', 'EUR')));
     }
 }

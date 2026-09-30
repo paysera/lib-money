@@ -23,16 +23,12 @@ class MoneyNormalizerTest extends TestCase
 
     /**
      * @param array<string, string|int> $data
-     * @param array<string, string> $expected
      *
      * @dataProvider mapToEntityProvider
      */
-    public function testMapToEntity(array $data, array $expected)
+    public function testMapToEntity(array $data, Money $expected)
     {
-        $money = (new MoneyNormalizer())->mapToEntity($data);
-
-        $this->assertInstanceOf(Money::class, $money);
-        $this->assertSame($expected, ['amount' => $money->getAmount(), 'currency' => $money->getCurrency()]);
+        $this->assertEquals($expected, (new MoneyNormalizer())->mapToEntity($data));
     }
 
     /**
@@ -41,22 +37,13 @@ class MoneyNormalizerTest extends TestCase
     public function mapToEntityProvider()
     {
         return [
-            'decimal point' => [
-                ['amount' => '10.50', 'currency' => 'EUR'],
-                ['amount' => '10.50', 'currency' => 'EUR'],
-            ],
+            'decimal point' => [['amount' => '10.50', 'currency' => 'EUR'], new Money('10.50', 'EUR')],
             'decimal comma and lower-case currency' => [
                 ['amount' => '10,50', 'currency' => 'eur'],
-                ['amount' => '10.50', 'currency' => 'EUR'],
+                new Money('10.50', 'EUR'),
             ],
-            'integer amount' => [
-                ['amount' => 7, 'currency' => 'JPY'],
-                ['amount' => '7', 'currency' => 'JPY'],
-            ],
-            'negative amount' => [
-                ['amount' => '-0.01', 'currency' => 'USD'],
-                ['amount' => '-0.01', 'currency' => 'USD'],
-            ],
+            'integer amount' => [['amount' => 7, 'currency' => 'JPY'], new Money('7', 'JPY')],
+            'negative amount' => [['amount' => '-0.01', 'currency' => 'USD'], new Money('-0.01', 'USD')],
         ];
     }
 
@@ -94,15 +81,11 @@ class MoneyNormalizerTest extends TestCase
     }
 
     /**
-     * @param array<string, string> $expected
-     *
      * @dataProvider mapFromCentsAndMinorUnitsProvider
      */
-    public function testMapFromCentsAndMinorUnits(string $method, int $amount, string $currency, array $expected)
+    public function testMapFromCentsAndMinorUnits(string $method, int $amount, string $currency, Money $expected)
     {
-        $money = (new MoneyNormalizer())->$method($amount, $currency);
-
-        $this->assertSame($expected, ['amount' => $money->getAmount(), 'currency' => $money->getCurrency()]);
+        $this->assertEquals($expected, (new MoneyNormalizer())->$method($amount, $currency));
     }
 
     /**
@@ -111,24 +94,24 @@ class MoneyNormalizerTest extends TestCase
     public function mapFromCentsAndMinorUnitsProvider()
     {
         return [
-            'cents' => ['mapFromCents', 1050, 'EUR', ['amount' => '10.500000', 'currency' => 'EUR']],
+            'cents' => ['mapFromCents', 1050, 'EUR', new Money('10.500000', 'EUR')],
             'minor units of a currency with two decimals' => [
                 'mapFromMinorUnits',
                 1050,
                 'EUR',
-                ['amount' => '10.500000', 'currency' => 'EUR'],
+                new Money('10.500000', 'EUR'),
             ],
             'minor units of a currency without decimals' => [
                 'mapFromMinorUnits',
                 1050,
                 'JPY',
-                ['amount' => '1050.000000', 'currency' => 'JPY'],
+                new Money('1050.000000', 'JPY'),
             ],
             'minor units of a currency with three decimals' => [
                 'mapFromMinorUnits',
                 1050,
                 'KWD',
-                ['amount' => '1.050000', 'currency' => 'KWD'],
+                new Money('1.050000', 'KWD'),
             ],
         ];
     }
@@ -211,6 +194,6 @@ class MoneyNormalizerTest extends TestCase
         $normalizer = new MoneyNormalizer();
         $money = new Money('1234.56', 'EUR');
 
-        $this->assertTrue($normalizer->mapToEntity($normalizer->mapFromEntity($money))->isEqual($money));
+        $this->assertEquals($money, $normalizer->mapToEntity($normalizer->mapFromEntity($money)));
     }
 }

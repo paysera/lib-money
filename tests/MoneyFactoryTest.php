@@ -24,16 +24,12 @@ class MoneyFactoryTest extends TestCase
 
     /**
      * @param array<int, string|int> $arguments
-     * @param array<string, string> $expected
      *
      * @dataProvider createProvider
      */
-    public function testCreate(string $method, array $arguments, array $expected)
+    public function testCreate(string $method, array $arguments, Money $expected)
     {
-        $money = $this->createFactory()->$method(...$arguments);
-
-        $this->assertInstanceOf(Money::class, $money);
-        $this->assertSame($expected, ['amount' => $money->getAmount(), 'currency' => $money->getCurrency()]);
+        $this->assertEquals($expected, $this->createFactory()->$method(...$arguments));
     }
 
     /**
@@ -42,13 +38,9 @@ class MoneyFactoryTest extends TestCase
     public function createProvider()
     {
         return [
-            'amount' => ['create', ['10.50', 'EUR'], ['amount' => '10.50', 'currency' => 'EUR']],
-            'zero' => ['createZero', ['EUR'], ['amount' => '0', 'currency' => 'EUR']],
-            'cents' => [
-                'createFromCents',
-                [1050, 'EUR'],
-                ['amount' => '10.500000', 'currency' => 'EUR'],
-            ],
+            'amount' => ['create', ['10.50', 'EUR'], new Money('10.50', 'EUR')],
+            'zero' => ['createZero', ['EUR'], new Money('0', 'EUR')],
+            'cents' => ['createFromCents', [1050, 'EUR'], new Money('10.500000', 'EUR')],
         ];
     }
 
