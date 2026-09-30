@@ -32,7 +32,7 @@ class MoneyFactoryTest extends TestCase
         $money = $this->createFactory()->$method(...$arguments);
 
         $this->assertInstanceOf(Money::class, $money);
-        $this->assertSame($expected, array('amount' => $money->getAmount(), 'currency' => $money->getCurrency()));
+        $this->assertSame($expected, ['amount' => $money->getAmount(), 'currency' => $money->getCurrency()]);
     }
 
     /**
@@ -40,22 +40,22 @@ class MoneyFactoryTest extends TestCase
      */
     public function createProvider()
     {
-        return array(
-            'amount' => array('create', array('10.50', 'EUR'), array('amount' => '10.50', 'currency' => 'EUR')),
-            'zero' => array('createZero', array('EUR'), array('amount' => '0', 'currency' => 'EUR')),
-            'cents' => array(
+        return [
+            'amount' => ['create', ['10.50', 'EUR'], ['amount' => '10.50', 'currency' => 'EUR']],
+            'zero' => ['createZero', ['EUR'], ['amount' => '0', 'currency' => 'EUR']],
+            'cents' => [
                 'createFromCents',
-                array(1050, 'EUR'),
-                array('amount' => '10.500000', 'currency' => 'EUR'),
-            ),
-        );
+                [1050, 'EUR'],
+                ['amount' => '10.500000', 'currency' => 'EUR'],
+            ],
+        ];
     }
 
     public function testCreateValidatesTheCurrencyAgainstTheInformationProvider()
     {
         $this->expectException(InvalidCurrencyException::class);
 
-        $this->createFactory(array('USD'))->create('1', 'EUR');
+        $this->createFactory(['USD'])->create('1', 'EUR');
     }
 
     /**

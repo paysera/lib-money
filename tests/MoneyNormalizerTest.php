@@ -30,7 +30,7 @@ class MoneyNormalizerTest extends TestCase
         $money = (new MoneyNormalizer())->mapToEntity($data);
 
         $this->assertInstanceOf(Money::class, $money);
-        $this->assertSame($expected, array('amount' => $money->getAmount(), 'currency' => $money->getCurrency()));
+        $this->assertSame($expected, ['amount' => $money->getAmount(), 'currency' => $money->getCurrency()]);
     }
 
     /**
@@ -38,24 +38,24 @@ class MoneyNormalizerTest extends TestCase
      */
     public function mapToEntityProvider()
     {
-        return array(
-            'decimal point' => array(
-                array('amount' => '10.50', 'currency' => 'EUR'),
-                array('amount' => '10.50', 'currency' => 'EUR'),
-            ),
-            'decimal comma and lower-case currency' => array(
-                array('amount' => '10,50', 'currency' => 'eur'),
-                array('amount' => '10.50', 'currency' => 'EUR'),
-            ),
-            'integer amount' => array(
-                array('amount' => 7, 'currency' => 'JPY'),
-                array('amount' => '7', 'currency' => 'JPY'),
-            ),
-            'negative amount' => array(
-                array('amount' => '-0.01', 'currency' => 'USD'),
-                array('amount' => '-0.01', 'currency' => 'USD'),
-            ),
-        );
+        return [
+            'decimal point' => [
+                ['amount' => '10.50', 'currency' => 'EUR'],
+                ['amount' => '10.50', 'currency' => 'EUR'],
+            ],
+            'decimal comma and lower-case currency' => [
+                ['amount' => '10,50', 'currency' => 'eur'],
+                ['amount' => '10.50', 'currency' => 'EUR'],
+            ],
+            'integer amount' => [
+                ['amount' => 7, 'currency' => 'JPY'],
+                ['amount' => '7', 'currency' => 'JPY'],
+            ],
+            'negative amount' => [
+                ['amount' => '-0.01', 'currency' => 'USD'],
+                ['amount' => '-0.01', 'currency' => 'USD'],
+            ],
+        ];
     }
 
     /**
@@ -77,16 +77,16 @@ class MoneyNormalizerTest extends TestCase
      */
     public function mapToEntityRejectsProvider()
     {
-        return array(
-            'no amount' => array(array('currency' => 'EUR'), 'Amount is not set'),
-            'no currency' => array(array('amount' => '1'), 'Currency is not set'),
-            'not a number' => array(array('amount' => '1.2.3', 'currency' => 'EUR'), 'Invalid amount specified'),
-            'unknown currency' => array(array('amount' => '1', 'currency' => 'ZZZ'), 'Invalid amount specified'),
-            'more decimals than the currency has' => array(
-                array('amount' => '10.555', 'currency' => 'EUR'),
+        return [
+            'no amount' => [['currency' => 'EUR'], 'Amount is not set'],
+            'no currency' => [['amount' => '1'], 'Currency is not set'],
+            'not a number' => [['amount' => '1.2.3', 'currency' => 'EUR'], 'Invalid amount specified'],
+            'unknown currency' => [['amount' => '1', 'currency' => 'ZZZ'], 'Invalid amount specified'],
+            'more decimals than the currency has' => [
+                ['amount' => '10.555', 'currency' => 'EUR'],
                 'Too small fraction for the amount specified',
-            ),
-        );
+            ],
+        ];
     }
 
     /**
@@ -101,7 +101,7 @@ class MoneyNormalizerTest extends TestCase
     {
         $money = (new MoneyNormalizer())->$method($amount, $currency);
 
-        $this->assertSame($expected, array('amount' => $money->getAmount(), 'currency' => $money->getCurrency()));
+        $this->assertSame($expected, ['amount' => $money->getAmount(), 'currency' => $money->getCurrency()]);
     }
 
     /**
@@ -109,27 +109,27 @@ class MoneyNormalizerTest extends TestCase
      */
     public function mapFromCentsAndMinorUnitsProvider()
     {
-        return array(
-            'cents' => array('mapFromCents', 1050, 'EUR', array('amount' => '10.500000', 'currency' => 'EUR')),
-            'minor units of a currency with two decimals' => array(
+        return [
+            'cents' => ['mapFromCents', 1050, 'EUR', ['amount' => '10.500000', 'currency' => 'EUR']],
+            'minor units of a currency with two decimals' => [
                 'mapFromMinorUnits',
                 1050,
                 'EUR',
-                array('amount' => '10.500000', 'currency' => 'EUR'),
-            ),
-            'minor units of a currency without decimals' => array(
+                ['amount' => '10.500000', 'currency' => 'EUR'],
+            ],
+            'minor units of a currency without decimals' => [
                 'mapFromMinorUnits',
                 1050,
                 'JPY',
-                array('amount' => '1050.000000', 'currency' => 'JPY'),
-            ),
-            'minor units of a currency with three decimals' => array(
+                ['amount' => '1050.000000', 'currency' => 'JPY'],
+            ],
+            'minor units of a currency with three decimals' => [
                 'mapFromMinorUnits',
                 1050,
                 'KWD',
-                array('amount' => '1.050000', 'currency' => 'KWD'),
-            ),
-        );
+                ['amount' => '1.050000', 'currency' => 'KWD'],
+            ],
+        ];
     }
 
     /**
@@ -153,21 +153,21 @@ class MoneyNormalizerTest extends TestCase
      */
     public function mapFromCentsAndMinorUnitsRejectsProvider()
     {
-        return array(
-            'cents that are not an integer' => array('mapFromCents', '10.5', 'EUR', 'Invalid amount specified'),
-            'cents of a currency without decimals' => array(
+        return [
+            'cents that are not an integer' => ['mapFromCents', '10.5', 'EUR', 'Invalid amount specified'],
+            'cents of a currency without decimals' => [
                 'mapFromCents',
                 1,
                 'JPY',
                 'Too small fraction for the amount specified',
-            ),
-            'minor units that are not an integer' => array(
+            ],
+            'minor units that are not an integer' => [
                 'mapFromMinorUnits',
                 '10.5',
                 'EUR',
                 'Invalid amount specified',
-            ),
-        );
+            ],
+        ];
     }
 
     /**
@@ -187,19 +187,19 @@ class MoneyNormalizerTest extends TestCase
      */
     public function mapFromEntityProvider()
     {
-        return array(
-            'padded to the decimals of the currency' => array(
+        return [
+            'padded to the decimals of the currency' => [
                 '10.5',
                 'EUR',
-                array('amount' => '10.50', 'currency' => 'EUR'),
-            ),
-            'formatted to the decimals of the currency (2.0.0)' => array(
+                ['amount' => '10.50', 'currency' => 'EUR'],
+            ],
+            'formatted to the decimals of the currency (2.0.0)' => [
                 '42.421234',
                 'EUR',
-                array('amount' => '42.42', 'currency' => 'EUR'),
-            ),
-            'currency without decimals' => array('1050', 'JPY', array('amount' => '1050', 'currency' => 'JPY')),
-        );
+                ['amount' => '42.42', 'currency' => 'EUR'],
+            ],
+            'currency without decimals' => ['1050', 'JPY', ['amount' => '1050', 'currency' => 'JPY']],
+        ];
     }
 
     public function testMapFromEntityRejectsAnythingButMoney()
@@ -207,7 +207,7 @@ class MoneyNormalizerTest extends TestCase
         $this->expectException(InvalidDataException::class);
         $this->expectExceptionMessage('Provided argument is not a Money object.');
 
-        (new MoneyNormalizer())->mapFromEntity(array('amount' => '1', 'currency' => 'EUR'));
+        (new MoneyNormalizer())->mapFromEntity(['amount' => '1', 'currency' => 'EUR']);
     }
 
     public function testRoundTrip()

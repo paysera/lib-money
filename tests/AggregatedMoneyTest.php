@@ -28,33 +28,33 @@ class AggregatedMoneyTest extends TestCase
 
     public function addProvider()
     {
-        return array(
-            array(new Money('1', 'EUR'), new Money('2', 'EUR'), new Money('3', 'EUR')),
-            array(new Money('-10', 'EUR'), new Money('2', 'EUR'), new Money('-8', 'EUR')),
-            array(new Money('-10', 'EUR'), new Money('-10', 'EUR'), new Money('-20', 'EUR')),
-            array(new Money('1', 'EUR'), new Money('-2', 'EUR'), new Money('-1', 'EUR'))
-        );
+        return [
+            [new Money('1', 'EUR'), new Money('2', 'EUR'), new Money('3', 'EUR')],
+            [new Money('-10', 'EUR'), new Money('2', 'EUR'), new Money('-8', 'EUR')],
+            [new Money('-10', 'EUR'), new Money('-10', 'EUR'), new Money('-20', 'EUR')],
+            [new Money('1', 'EUR'), new Money('-2', 'EUR'), new Money('-1', 'EUR')]
+        ];
     }
 
     public function testAddAllAndGetAll()
     {
         $aggregatedMoney = new AggregatedMoney();
 
-        $result = $aggregatedMoney->addAll(array(
+        $result = $aggregatedMoney->addAll([
             new Money('1', 'EUR'),
             new Money('2', 'USD'),
             new Money('3', 'EUR'),
-        ));
+        ]);
 
         $this->assertSame($aggregatedMoney, $result);
         $this->assertSame(
-            array(
-                array('amount' => '4.000000', 'currency' => 'EUR'),
-                array('amount' => '2.000000', 'currency' => 'USD'),
-            ),
+            [
+                ['amount' => '4.000000', 'currency' => 'EUR'],
+                ['amount' => '2.000000', 'currency' => 'USD'],
+            ],
             array_map(
                 function (Money $money) {
-                    return array('amount' => $money->getAmount(), 'currency' => $money->getCurrency());
+                    return ['amount' => $money->getAmount(), 'currency' => $money->getCurrency()];
                 },
                 $aggregatedMoney->getAll()
             )
