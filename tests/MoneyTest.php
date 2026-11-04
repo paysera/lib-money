@@ -1159,7 +1159,7 @@ class MoneyTest extends TestCase
      *
      * @dataProvider validOperandProvider
      */
-    public function testMulAndDivAcceptEveryOperandShapeBcmathAccepts(string $method, $operand, string $expected)
+    public function testMulAndDivAcceptANumericOperand(string $method, $operand, string $expected)
     {
         $this->assertSame($expected, (new Money('10', 'EUR'))->$method($operand)->getAmount());
     }
@@ -1179,10 +1179,21 @@ class MoneyTest extends TestCase
             'divisor without a leading digit' => ['div', '.5', '20.000000'],
             'null multiplier counts as zero' => ['mul', null, '0.000000'],
             'false multiplier counts as zero' => ['mul', false, '0.000000'],
+            'empty string multiplier counts as zero' => ['mul', '', '0.000000'],
             'float multiplier below 1e-4' => ['mul', 0.000035, '0.000350'],
             'float multiplier in scientific notation' => ['mul', 1.0E-5, '0.000100'],
             'large float multiplier' => ['mul', 1.0E+20, '1000000000000000000000.000000'],
             'float divisor below 1e-4' => ['div', 0.000035, '285714.285714'],
+            'true multiplier' => ['mul', true, '10.000000'],
+            'true divisor' => ['div', true, '10.000000'],
+            'multiplier with a plus sign' => ['mul', '+5', '50.000000'],
+            'divisor with a plus sign' => ['div', '+5', '2.000000'],
+            'negative zero string multiplier' => ['mul', '-0.0', '0.000000'],
+            'negative multiplier without a leading digit' => ['mul', '-.5', '-5.000000'],
+            'negative integer divisor' => ['div', -4, '-2.500000'],
+            'largest integer multiplier' => ['mul', PHP_INT_MAX, '92233720368547758070.000000'],
+            'stringable multiplier' => ['mul', new StringableOperand('2.5'), '25.000000'],
+            'stringable divisor' => ['div', new StringableOperand('2.5'), '4.000000'],
         ];
     }
 
@@ -1210,6 +1221,16 @@ class MoneyTest extends TestCase
             'zero with decimals' => ['0.00'],
             'null' => [null],
             'false' => [false],
+            'empty string' => [''],
+            'integer zero' => [0],
+            'float zero' => [0.0],
+            'float literal that underflows to zero' => [1.0E-400],
+            'negative zero with decimals' => ['-0.0'],
+            'zero with a plus sign' => ['+0'],
+            'zero without a leading digit' => ['.0'],
+            'zero with a trailing dot' => ['0.'],
+            'several zeros' => ['000'],
+            'stringable zero' => [new StringableOperand('0')],
         ];
     }
 
@@ -1250,6 +1271,18 @@ class MoneyTest extends TestCase
             'an array' => [[2], 'array'],
             'not a number float' => [NAN, 'NAN'],
             'infinite float' => [INF, 'INF'],
+            'zero in scientific notation' => ['0e0', '0e0'],
+            'string in scientific notation' => ['1.0E-5', '1.0E-5'],
+            'hexadecimal string' => ['0x1A', '0x1A'],
+            'sign only' => ['+', '+'],
+            'dot only' => ['.', '.'],
+            'minus sign only' => ['-', '-'],
+            'double sign' => ['--5', '--5'],
+            'leading space' => [' 5', ' 5'],
+            'trailing tab' => ["5\t", '5\t'],
+            'negative infinite float' => [-INF, '-INF'],
+            'stringable with a decimal comma' => [new StringableOperand('2,5'), '2,5'],
+            'object without __toString' => [new stdClass(), 'object'],
         ];
     }
 
@@ -1359,113 +1392,6 @@ class MoneyTest extends TestCase
     /**
      * @param mixed $operand
      *
-     * @dataProvider unusualValidOperandProvider
-     */
-    public function testMulAndDivAcceptAnUnusualButValidOperand(string $method, $operand, string $expected)
-    {
-        $this->assertSame($expected, (new Money('10', 'EUR'))->$method($operand)->getAmount());
-    }
-
-    /**
-     * @return array[]
-     */
-    public function unusualValidOperandProvider()
-    {
-        return [
-            'true multiplier' => ['mul', true, '10.000000'],
-            'true divisor' => ['div', true, '10.000000'],
-            'multiplier with a plus sign' => ['mul', '+5', '50.000000'],
-            'divisor with a plus sign' => ['div', '+5', '2.000000'],
-            'negative zero string multiplier' => ['mul', '-0.0', '0.000000'],
-            'negative multiplier without a leading digit' => ['mul', '-.5', '-5.000000'],
-            'negative integer divisor' => ['div', -4, '-2.500000'],
-            'largest integer multiplier' => ['mul', PHP_INT_MAX, '92233720368547758070.000000'],
-            'stringable multiplier' => ['mul', new StringableOperand('2.5'), '25.000000'],
-            'stringable divisor' => ['div', new StringableOperand('2.5'), '4.000000'],
-        ];
-    }
-
-    /**
-     * @param mixed $divisor
-     *
-     * @dataProvider otherZeroDivisorProvider
-     */
-    public function testDivRejectsAZeroDivisorWrittenAnotherWay($divisor)
-    {
-        $this->expectException(MoneyException::class);
-        $this->expectExceptionMessage('Division by zero');
-
-        (new Money('10', 'EUR'))->div($divisor);
-    }
-
-    /**
-     * @return array[]
-     */
-    public function otherZeroDivisorProvider()
-    {
-        return [
-            'integer zero' => [0],
-            'float zero' => [0.0],
-            'float literal that underflows to zero' => [1.0E-400],
-            'negative zero with decimals' => ['-0.0'],
-            'zero with a plus sign' => ['+0'],
-            'zero without a leading digit' => ['.0'],
-            'zero with a trailing dot' => ['0.'],
-            'several zeros' => ['000'],
-            'stringable zero' => [new StringableOperand('0')],
-        ];
-    }
-
-    /**
-     * @param mixed $operand
-     *
-     * @dataProvider unreadableOperandProvider
-     */
-    public function testMulRejectsAnUnreadableMultiplier($operand, string $message)
-    {
-        $this->expectException(MoneyException::class);
-        $this->expectExceptionMessage('Invalid multiplier: ' . $message);
-
-        (new Money('10', 'EUR'))->mul($operand);
-    }
-
-    /**
-     * @param mixed $operand
-     *
-     * @dataProvider unreadableOperandProvider
-     */
-    public function testDivRejectsAnUnreadableDivisor($operand, string $message)
-    {
-        $this->expectException(MoneyException::class);
-        $this->expectExceptionMessage('Invalid divisor: ' . $message);
-
-        (new Money('10', 'EUR'))->div($operand);
-    }
-
-    /**
-     * @return array[]
-     */
-    public function unreadableOperandProvider()
-    {
-        return [
-            'zero in scientific notation' => ['0e0', '0e0'],
-            'string in scientific notation' => ['1.0E-5', '1.0E-5'],
-            'hexadecimal string' => ['0x1A', '0x1A'],
-            'empty string' => ['', ''],
-            'sign only' => ['+', '+'],
-            'dot only' => ['.', '.'],
-            'double sign' => ['--5', '--5'],
-            'leading space' => [' 5', ' 5'],
-            'trailing tab' => ["5\t", '5\t'],
-            'negative infinite float' => [-INF, '-INF'],
-            'stringable with a decimal comma' => [new StringableOperand('2,5'), '2,5'],
-            'object without __toString' => [new stdClass(), 'object'],
-        ];
-    }
-
-    /**
-     * @param mixed $operand
-     *
      * @dataProvider rejectedOperandProvider
      */
     public function testMulAndDivLeaveTheMoneyUnchangedWhenTheOperandIsRejected(string $method, $operand)
@@ -1493,6 +1419,8 @@ class MoneyTest extends TestCase
             'invalid divisor' => ['div', '2,5'],
             'zero divisor' => ['div', '0'],
             'not a number divisor' => ['div', NAN],
+            'empty string divisor' => ['div', ''],
+            'null divisor' => ['div', null],
         ];
     }
 
@@ -1502,6 +1430,58 @@ class MoneyTest extends TestCase
         $this->expectExceptionMessage('Fraction must not be negative: -2');
 
         Money::createFromNoDelimiterAmount('1234', 'EUR', -2);
+    }
+
+    /**
+     * @param int|string|float $fraction
+     *
+     * @dataProvider fractionAboveTheLimitProvider
+     */
+    public function testCreateFromNoDelimiterAmountRejectsAFractionAboveTheLimit($fraction, string $message)
+    {
+        $this->expectException(MoneyException::class);
+        $this->expectExceptionMessage($message);
+
+        Money::createFromNoDelimiterAmount('1234', 'EUR', $fraction);
+    }
+
+    /**
+     * @return array[]
+     */
+    public function fractionAboveTheLimitProvider()
+    {
+        return [
+            'integer just above the limit' => [21, 'Fraction must not be greater than 20: 21'],
+            'largest integer' => [PHP_INT_MAX, 'Fraction must not be greater than 20: ' . PHP_INT_MAX],
+            'integer string beyond the integer range' => [
+                '99999999999999999999',
+                'Fraction must not be greater than 20: 99999999999999999999',
+            ],
+            'float that wraps to zero as an integer' => [
+                1.8446744073709552E+19,
+                'Fraction must not be greater than 20: 1.844674407371E+19',
+            ],
+            'float that wraps to a negative integer' => [
+                9.223372036854776E+18,
+                'Fraction must not be greater than 20: 9.2233720368548E+18',
+            ],
+        ];
+    }
+
+    public function testCreateFromNoDelimiterAmountRejectsANegativeFloatFractionBeyondTheIntegerRange()
+    {
+        $this->expectException(MoneyException::class);
+        $this->expectExceptionMessage('Fraction must not be negative: -1.0E+19');
+
+        Money::createFromNoDelimiterAmount('1234', 'EUR', -1.0E+19);
+    }
+
+    public function testCreateFromNoDelimiterAmountAcceptsAFractionAtTheLimit()
+    {
+        $this->assertSame(
+            '0.00000000000000001234',
+            Money::createFromNoDelimiterAmount('1234', 'EUR', 20)->getAmount()
+        );
     }
 
     /**
@@ -1524,10 +1504,147 @@ class MoneyTest extends TestCase
     {
         return [
             'null' => [null, 'Fraction must be an integer: NULL'],
-            'numeric string' => ['2', "Fraction must be an integer: '2'"],
-            'float' => [2.0, 'Fraction must be an integer: 2.0'],
+            'fractional float' => [2.5, 'Fraction must be an integer: 2.5'],
+            'decimal string' => ['2.0', "Fraction must be an integer: '2.0'"],
+            'string with a plus sign' => ['+2', "Fraction must be an integer: '+2'"],
             'string with a line feed' => ["2\n", "Fraction must be an integer: '2\\n'"],
+            'true' => [true, 'Fraction must be an integer: true'],
+            'infinite float' => [INF, 'Fraction must be an integer: INF'],
+            'not a number float' => [NAN, 'Fraction must be an integer: NAN'],
+            'negative infinite float' => [-INF, 'Fraction must be an integer: -INF'],
+            'empty string' => ['', "Fraction must be an integer: ''"],
+            'false' => [false, 'Fraction must be an integer: false'],
+            'string with a leading space' => [' 2', "Fraction must be an integer: ' 2'"],
+            'hexadecimal string' => ['0x2', "Fraction must be an integer: '0x2'"],
+            'string in scientific notation' => ['2e0', "Fraction must be an integer: '2e0'"],
+            'array' => [[2], 'Fraction must be an integer: array'],
+            'stringable object' => [new StringableOperand('2'), 'Fraction must be an integer: object'],
         ];
+    }
+
+    /**
+     * @param string|float $fraction
+     *
+     * @dataProvider validFractionProvider
+     */
+    public function testCreateFromNoDelimiterAmountReadsAValidFraction(
+        string $amount,
+        string $currency,
+        $fraction,
+        string $expected
+    ) {
+        $this->assertSame($expected, Money::createFromNoDelimiterAmount($amount, $currency, $fraction)->getAmount());
+    }
+
+    /**
+     * @return array[]
+     */
+    public function validFractionProvider()
+    {
+        return [
+            'numeric string' => ['1234', 'EUR', '2', '12.34'],
+            'integral float' => ['1234', 'EUR', 2.0, '12.34'],
+            'zero as a string' => ['1234', 'JPY', '0', '1234'],
+            'zero as a float' => ['1234', 'JPY', 0.0, '1234'],
+            'negative zero string' => ['1234', 'JPY', '-0', '1234'],
+            'negative zero float' => ['1234', 'JPY', -0.0, '1234'],
+            'string with a leading zero' => ['1234', 'EUR', '02', '12.34'],
+            'fraction longer than the amount' => ['5', 'EUR', 3, '0.005'],
+            'large string fraction' => ['1234', 'EUR', '20', '0.00000000000000001234'],
+            'empty amount' => ['', 'EUR', '2', '0.00'],
+        ];
+    }
+
+    /**
+     * @param string|float $fraction
+     *
+     * @dataProvider negativeWholeNumberFractionProvider
+     */
+    public function testCreateFromNoDelimiterAmountRejectsANegativeWholeNumberFractionThatIsNotAnInt($fraction)
+    {
+        $this->expectException(MoneyException::class);
+        $this->expectExceptionMessage('Fraction must not be negative: -1');
+
+        Money::createFromNoDelimiterAmount('1234', 'EUR', $fraction);
+    }
+
+    /**
+     * @return array[]
+     */
+    public function negativeWholeNumberFractionProvider()
+    {
+        return [
+            'negative string' => ['-1'],
+            'negative float' => [-1.0],
+        ];
+    }
+
+    public function testCreateFromNoDelimiterAmountReportsTheFractionBeforeAnUnsupportedCurrency()
+    {
+        $this->expectException(MoneyException::class);
+        $this->expectExceptionMessage('Fraction must be an integer: 2.5');
+
+        Money::createFromNoDelimiterAmount('1234', 'ZZZ', 2.5);
+    }
+
+    public function testCreateFromNoDelimiterAmountRejectsAnUnsupportedCurrencyWithAWholeNumberFraction()
+    {
+        $this->expectException(MoneyException::class);
+        $this->expectExceptionMessage('Unsupported currency: ZZZ');
+
+        Money::createFromNoDelimiterAmount('1234', 'ZZZ', '2');
+    }
+
+    public function testMulByAStringableEmptyStringCountsAsZeroLikeAnEmptyString()
+    {
+        $money = new Money('10', 'EUR');
+
+        $this->assertSame($money->mul('')->getAmount(), $money->mul(new StringableOperand(''))->getAmount());
+    }
+
+    public function testDivByAStringableEmptyStringIsADivisionByZeroLikeAnEmptyString()
+    {
+        $this->expectException(MoneyException::class);
+        $this->expectExceptionMessage('Division by zero');
+
+        (new Money('10', 'EUR'))->div(new StringableOperand(''));
+    }
+
+    /**
+     * @param mixed $operand
+     *
+     * @dataProvider blankOperandProvider
+     */
+    public function testMulAndDivRejectABlankOperandThatIsNotEmpty(string $method, $operand, string $message)
+    {
+        $this->expectException(MoneyException::class);
+        $this->expectExceptionMessage($message);
+
+        (new Money('10', 'EUR'))->$method($operand);
+    }
+
+    /**
+     * @return array[]
+     */
+    public function blankOperandProvider()
+    {
+        return [
+            'space multiplier' => ['mul', ' ', 'Invalid multiplier:  '],
+            'space divisor' => ['div', ' ', 'Invalid divisor:  '],
+            'line feed multiplier' => ['mul', "\n", 'Invalid multiplier: \n'],
+            'null byte divisor' => ['div', "\0", 'Invalid divisor: \000'],
+        ];
+    }
+
+    public function testMulByAnEmptyStringLeavesTheMoneyUnchanged()
+    {
+        $money = new Money('10.50', 'EUR');
+
+        $result = $money->mul('');
+
+        $this->assertSame('0.000000', $result->getAmount());
+        $this->assertSame('10.50', $money->getAmount());
+        $this->assertSame('EUR', $money->getCurrency());
     }
 
     public function testCreateFromNoDelimiterAmountWithAPlusSignCanBeNegated()

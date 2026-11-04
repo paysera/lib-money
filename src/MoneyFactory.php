@@ -2,6 +2,7 @@
 
 namespace Evp\Component\Money;
 
+use Maba\Component\Math\Exception\InvalidNumberException;
 use Maba\Component\Math\MathInterface as MabaMathInterface;
 use Maba\Component\Monetary\Exception\InvalidAmountException;
 use Maba\Component\Monetary\Exception\InvalidCurrencyException;
@@ -20,37 +21,26 @@ class MoneyFactory implements MoneyFactoryInterface
     }
 
     /**
-     * @param string $amount
-     * @param string $currency
+     * @param string|int|float|object|null $amount
+     * @param string|object|null $currency
      *
      * @return Money
      *
+     * @throws MoneyException
      * @throws InvalidAmountException
      * @throws InvalidCurrencyException
      */
     public function create($amount, $currency)
     {
-        if (is_object($amount) && method_exists($amount, '__toString')) {
-            $amount = (string)$amount;
-        }
-        if ($amount !== null && !is_scalar($amount)) {
-            throw new InvalidAmountException('Amount must be a number, ' . gettype($amount) . ' given');
+        $amount = self::castStringable($amount);
+        $currency = self::castStringable($currency);
+        if ($amount !== null && (!is_scalar($amount) || is_bool($amount))) {
+            throw new MoneyException('Amount must be a number, ' . gettype($amount) . ' given');
         }
         if ($currency !== null && !is_string($currency)) {
-            throw new InvalidCurrencyException('Currency must be a string, ' . gettype($currency) . ' given');
+            throw new MoneyException('Currency must be a string, ' . gettype($currency) . ' given');
         }
-        try {
-            $result = new Money($amount);
-        } catch (MoneyException $exception) {
-            throw new InvalidAmountException($exception->getMessage(), 0, $exception);
-        }
-        if ($currency !== null) {
-            try {
-                $result->setCurrency($currency);
-            } catch (MoneyException $exception) {
-                throw new InvalidCurrencyException($exception->getMessage(), 0, $exception);
-            }
-        }
+        $result = new Money($amount, $currency);
         $this->validator->validateMoney($result);
         return $result;
     }
@@ -62,6 +52,7 @@ class MoneyFactory implements MoneyFactoryInterface
      *
      * @return Money
      *
+     * @throws MoneyException
      * @throws InvalidAmountException
      * @throws InvalidCurrencyException
      */
@@ -71,20 +62,37 @@ class MoneyFactory implements MoneyFactoryInterface
     }
 
     /**
-     * @param int $amountInCents
+     * @param int|string|float|object $amountInCents
      * @param string $currency
      *
      * @return Money
      *
+     * @throws InvalidNumberException
+     * @throws MoneyException
      * @throws InvalidAmountException
      * @throws InvalidCurrencyException
      */
     public function createFromCents($amountInCents, $currency)
     {
-        if (!is_scalar($amountInCents) || !preg_match(Money::INTEGER_PATTERN, (string)$amountInCents)) {
-            throw new InvalidAmountException('Amount in cents must be integer');
+        $amountInCents = self::castStringable($amountInCents);
+        if (
+            !is_scalar($amountInCents)
+            || is_bool($amountInCents)
+            || !preg_match(Money::DECIMAL_PATTERN, (string)$amountInCents)
+        ) {
+            throw new InvalidNumberException('Amount in cents must be a number');
         }
 
         return $this->create($this->math->div($amountInCents, '100'), $currency);
+    }
+
+    /**
+     * @param mixed $value
+     *
+     * @return mixed
+     */
+    private static function castStringable($value)
+    {
+        return is_object($value) && method_exists($value, '__toString') ? (string)$value : $value;
     }
 }
