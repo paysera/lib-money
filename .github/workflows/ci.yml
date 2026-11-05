@@ -64,6 +64,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Install locales
+        run: sudo locale-gen de_DE.UTF-8 lt_LT.UTF-8
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:

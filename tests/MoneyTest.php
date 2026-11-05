@@ -1047,12 +1047,27 @@ class MoneyTest extends TestCase
         ];
     }
 
-    public function testTheRejectionMessageEscapesControlCharacters()
+    /**
+     * @dataProvider escapedRejectionMessageProvider
+     */
+    public function testTheRejectionMessageEscapesControlCharacters(string $amount, string $message)
     {
         $this->expectException(MoneyException::class);
-        $this->expectExceptionMessage('Amount has invalid chars: 12.34\n');
+        $this->expectExceptionMessage($message);
 
-        new Money("12.34\n", 'EUR');
+        new Money($amount, 'EUR');
+    }
+
+    /**
+     * @return array[]
+     */
+    public function escapedRejectionMessageProvider()
+    {
+        return [
+            'line feed' => ["12.34\n", 'Amount has invalid chars: 12.34\n'],
+            'backslash' => ['1\\2', 'Amount has invalid chars: 1\\\\2'],
+            'delete character' => ["12\x7f", 'Amount has invalid chars: 12\177'],
+        ];
     }
 
     public function testCreateRejectsAnAmountWithALineEnding()
@@ -1363,6 +1378,9 @@ class MoneyTest extends TestCase
     {
         $previousLocale = setlocale(LC_NUMERIC, '0');
         if (setlocale(LC_NUMERIC, $locale) === false) {
+            if (getenv('CI') !== false) {
+                $this->fail(sprintf('Locale %s is not installed on CI', $locale));
+            }
             $this->markTestSkipped(sprintf('Locale %s is not installed', $locale));
         }
 
@@ -1373,6 +1391,7 @@ class MoneyTest extends TestCase
             $this->assertSame('0.000100', $money->mul(1.0E-5)->getAmount());
             $this->assertSame('-0.000350', $money->mul(-0.000035)->getAmount());
             $this->assertSame('40.000000', $money->div(0.25)->getAmount());
+            $this->assertSame('12.34', Money::createFromNoDelimiterAmount('1234', 'EUR', 2.5)->getAmount());
         } finally {
             setlocale(LC_NUMERIC, $previousLocale);
         }
@@ -1424,20 +1443,12 @@ class MoneyTest extends TestCase
         ];
     }
 
-    public function testCreateFromNoDelimiterAmountRejectsANegativeFraction()
-    {
-        $this->expectException(MoneyException::class);
-        $this->expectExceptionMessage('Fraction must not be negative: -2');
-
-        Money::createFromNoDelimiterAmount('1234', 'EUR', -2);
-    }
-
     /**
      * @param int|string|float $fraction
      *
-     * @dataProvider fractionAboveTheLimitProvider
+     * @dataProvider negativeFractionProvider
      */
-    public function testCreateFromNoDelimiterAmountRejectsAFractionAboveTheLimit($fraction, string $message)
+    public function testCreateFromNoDelimiterAmountRejectsANegativeFraction($fraction, string $message)
     {
         $this->expectException(MoneyException::class);
         $this->expectExceptionMessage($message);
@@ -1448,48 +1459,54 @@ class MoneyTest extends TestCase
     /**
      * @return array[]
      */
-    public function fractionAboveTheLimitProvider()
+    public function negativeFractionProvider()
     {
         return [
-            'integer just above the limit' => [21, 'Fraction must not be greater than 20: 21'],
-            'largest integer' => [PHP_INT_MAX, 'Fraction must not be greater than 20: ' . PHP_INT_MAX],
-            'integer string beyond the integer range' => [
-                '99999999999999999999',
-                'Fraction must not be greater than 20: 99999999999999999999',
-            ],
-            'float that wraps to zero as an integer' => [
-                1.8446744073709552E+19,
-                'Fraction must not be greater than 20: 1.844674407371E+19',
-            ],
-            'float that wraps to a negative integer' => [
-                9.223372036854776E+18,
-                'Fraction must not be greater than 20: 9.2233720368548E+18',
-            ],
+            'negative integer' => [-2, 'Fraction must not be negative: -2'],
+            'negative string' => ['-1', 'Fraction must not be negative: -1'],
+            'negative float' => [-1.0, 'Fraction must not be negative: -1'],
+            'negative float beyond the integer range' => [-1.0E+19, 'Fraction must not be negative: -1.0E+19'],
         ];
     }
 
-    public function testCreateFromNoDelimiterAmountRejectsANegativeFloatFractionBeyondTheIntegerRange()
+    /**
+     * @param string|float $fraction
+     *
+     * @dataProvider outOfRangeFractionProvider
+     */
+    public function testCreateFromNoDelimiterAmountRejectsAFractionBeyondTheIntegerRange($fraction, string $message)
     {
         $this->expectException(MoneyException::class);
-        $this->expectExceptionMessage('Fraction must not be negative: -1.0E+19');
+        $this->expectExceptionMessage($message);
 
-        Money::createFromNoDelimiterAmount('1234', 'EUR', -1.0E+19);
+        Money::createFromNoDelimiterAmount('1234', 'EUR', $fraction);
     }
 
-    public function testCreateFromNoDelimiterAmountAcceptsAFractionAtTheLimit()
+    /**
+     * @return array[]
+     */
+    public function outOfRangeFractionProvider()
     {
-        $this->assertSame(
-            '0.00000000000000001234',
-            Money::createFromNoDelimiterAmount('1234', 'EUR', 20)->getAmount()
-        );
+        return [
+            'float far above the integer range' => [1.0E+19, 'Fraction is out of range: 1.0E+19'],
+            'float that wraps to zero as an integer' => [
+                1.8446744073709552E+19,
+                'Fraction is out of range: 1.844674407371E+19',
+            ],
+            'float just at the integer limit' => [9.223372036854776E+18, 'Fraction is out of range: 9.2233720368548E+18'],
+            'integer string beyond the integer range' => [
+                '99999999999999999999',
+                'Fraction is out of range: 99999999999999999999',
+            ],
+        ];
     }
 
     /**
      * @param mixed $fraction
      *
-     * @dataProvider nonIntegerFractionProvider
+     * @dataProvider unusableFractionProvider
      */
-    public function testCreateFromNoDelimiterAmountRejectsANonIntegerFraction($fraction, string $message)
+    public function testCreateFromNoDelimiterAmountRejectsAFractionThatIsNotAFiniteNumber($fraction, string $message)
     {
         $this->expectException(MoneyException::class);
         $this->expectExceptionMessage($message);
@@ -1500,34 +1517,26 @@ class MoneyTest extends TestCase
     /**
      * @return array[]
      */
-    public function nonIntegerFractionProvider()
+    public function unusableFractionProvider()
     {
         return [
-            'null' => [null, 'Fraction must be an integer: NULL'],
-            'fractional float' => [2.5, 'Fraction must be an integer: 2.5'],
-            'decimal string' => ['2.0', "Fraction must be an integer: '2.0'"],
-            'string with a plus sign' => ['+2', "Fraction must be an integer: '+2'"],
-            'string with a line feed' => ["2\n", "Fraction must be an integer: '2\\n'"],
-            'true' => [true, 'Fraction must be an integer: true'],
-            'infinite float' => [INF, 'Fraction must be an integer: INF'],
-            'not a number float' => [NAN, 'Fraction must be an integer: NAN'],
-            'negative infinite float' => [-INF, 'Fraction must be an integer: -INF'],
-            'empty string' => ['', "Fraction must be an integer: ''"],
-            'false' => [false, 'Fraction must be an integer: false'],
-            'string with a leading space' => [' 2', "Fraction must be an integer: ' 2'"],
-            'hexadecimal string' => ['0x2', "Fraction must be an integer: '0x2'"],
-            'string in scientific notation' => ['2e0', "Fraction must be an integer: '2e0'"],
-            'array' => [[2], 'Fraction must be an integer: array'],
-            'stringable object' => [new StringableOperand('2'), 'Fraction must be an integer: object'],
+            'infinite float' => [INF, 'Fraction must be finite: INF'],
+            'negative infinite float' => [-INF, 'Fraction must be finite: -INF'],
+            'not a number float' => [NAN, 'Fraction must be finite: NAN'],
+            'empty string' => ['', "Fraction must be a number: ''"],
+            'hexadecimal string' => ['0x2', "Fraction must be a number: '0x2'"],
+            'text' => ['two', "Fraction must be a number: 'two'"],
+            'array' => [[2], 'Fraction must be a number: array'],
+            'stringable object' => [new StringableOperand('2'), 'Fraction must be a number: object'],
         ];
     }
 
     /**
-     * @param string|float $fraction
+     * @param mixed $fraction
      *
      * @dataProvider validFractionProvider
      */
-    public function testCreateFromNoDelimiterAmountReadsAValidFraction(
+    public function testCreateFromNoDelimiterAmountReadsAFractionAsBefore(
         string $amount,
         string $currency,
         $fraction,
@@ -1544,47 +1553,24 @@ class MoneyTest extends TestCase
         return [
             'numeric string' => ['1234', 'EUR', '2', '12.34'],
             'integral float' => ['1234', 'EUR', 2.0, '12.34'],
+            'fractional float' => ['1234', 'EUR', 2.5, '12.34'],
+            'decimal string' => ['1234', 'EUR', '2.0', '12.34'],
+            'string with a plus sign' => ['1234', 'EUR', '+2', '12.34'],
+            'string with a leading space' => ['1234', 'EUR', ' 2', '12.34'],
+            'string with a line feed' => ['1234', 'EUR', "2\n", '12.34'],
+            'string in scientific notation' => ['1234', 'EUR', '2e0', '12.34'],
+            'true' => ['1234', 'EUR', true, '123.4'],
             'zero as a string' => ['1234', 'JPY', '0', '1234'],
             'zero as a float' => ['1234', 'JPY', 0.0, '1234'],
             'negative zero string' => ['1234', 'JPY', '-0', '1234'],
             'negative zero float' => ['1234', 'JPY', -0.0, '1234'],
+            'null' => ['1234', 'JPY', null, '1234'],
+            'false' => ['1234', 'JPY', false, '1234'],
             'string with a leading zero' => ['1234', 'EUR', '02', '12.34'],
             'fraction longer than the amount' => ['5', 'EUR', 3, '0.005'],
-            'large string fraction' => ['1234', 'EUR', '20', '0.00000000000000001234'],
+            'fraction above twenty' => ['1', 'EUR', 21, '0.000000000000000000001'],
             'empty amount' => ['', 'EUR', '2', '0.00'],
         ];
-    }
-
-    /**
-     * @param string|float $fraction
-     *
-     * @dataProvider negativeWholeNumberFractionProvider
-     */
-    public function testCreateFromNoDelimiterAmountRejectsANegativeWholeNumberFractionThatIsNotAnInt($fraction)
-    {
-        $this->expectException(MoneyException::class);
-        $this->expectExceptionMessage('Fraction must not be negative: -1');
-
-        Money::createFromNoDelimiterAmount('1234', 'EUR', $fraction);
-    }
-
-    /**
-     * @return array[]
-     */
-    public function negativeWholeNumberFractionProvider()
-    {
-        return [
-            'negative string' => ['-1'],
-            'negative float' => [-1.0],
-        ];
-    }
-
-    public function testCreateFromNoDelimiterAmountReportsTheFractionBeforeAnUnsupportedCurrency()
-    {
-        $this->expectException(MoneyException::class);
-        $this->expectExceptionMessage('Fraction must be an integer: 2.5');
-
-        Money::createFromNoDelimiterAmount('1234', 'ZZZ', 2.5);
     }
 
     public function testCreateFromNoDelimiterAmountRejectsAnUnsupportedCurrencyWithAWholeNumberFraction()
@@ -1658,17 +1644,6 @@ class MoneyTest extends TestCase
         $this->expectExceptionMessage('Invalid amount without delimiter: 1234\n');
 
         Money::createFromNoDelimiterAmount("1234\n", 'EUR');
-    }
-
-    /**
-     * @dataProvider createFromIntegerUnitsProvider
-     */
-    public function testCreateFromCentsOrMinorUnitsRejectsALineEnding(string $method)
-    {
-        $this->expectException(MoneyException::class);
-        $this->expectExceptionMessage('Amount must be integer');
-
-        Money::$method("1234\n", 'EUR');
     }
 
     public function testAnAmountWithTwoDecimalSeparatorsIsRejected()
@@ -1774,6 +1749,17 @@ class MoneyTest extends TestCase
             'no cents' => ['createFromCents', null, null],
             'empty amount without delimiter' => ['createFromNoDelimiterAmount', '', '0.00'],
         ];
+    }
+
+    /**
+     * @dataProvider createFromIntegerUnitsProvider
+     */
+    public function testCreateFromCentsOrMinorUnitsRejectsALineEnding(string $method)
+    {
+        $this->expectException(MoneyException::class);
+        $this->expectExceptionMessage('Amount must be integer');
+
+        Money::$method("1234\n", 'EUR');
     }
 
     /**

@@ -32,8 +32,8 @@ class MoneyFactory implements MoneyFactoryInterface
      */
     public function create($amount, $currency)
     {
-        $amount = self::castStringable($amount);
-        $currency = self::castStringable($currency);
+        $amount = Money::castStringable($amount);
+        $currency = Money::castStringable($currency);
         if ($amount !== null && (!is_scalar($amount) || is_bool($amount))) {
             throw new MoneyException('Amount must be a number, ' . gettype($amount) . ' given');
         }
@@ -48,7 +48,7 @@ class MoneyFactory implements MoneyFactoryInterface
     /**
      * Create zero Money
      *
-     * @param string $currency
+     * @param string|object|null $currency
      *
      * @return Money
      *
@@ -63,7 +63,7 @@ class MoneyFactory implements MoneyFactoryInterface
 
     /**
      * @param int|string|float|object $amountInCents
-     * @param string $currency
+     * @param string|object|null $currency
      *
      * @return Money
      *
@@ -74,7 +74,7 @@ class MoneyFactory implements MoneyFactoryInterface
      */
     public function createFromCents($amountInCents, $currency)
     {
-        $amountInCents = self::castStringable($amountInCents);
+        $amountInCents = Money::castStringable($amountInCents);
         if (
             !is_scalar($amountInCents)
             || is_bool($amountInCents)
@@ -84,15 +84,5 @@ class MoneyFactory implements MoneyFactoryInterface
         }
 
         return $this->create($this->math->div($amountInCents, '100'), $currency);
-    }
-
-    /**
-     * @param mixed $value
-     *
-     * @return mixed
-     */
-    private static function castStringable($value)
-    {
-        return is_object($value) && method_exists($value, '__toString') ? (string)$value : $value;
     }
 }

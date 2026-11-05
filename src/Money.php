@@ -34,11 +34,6 @@ class Money implements MoneyInterface
     const OPERAND_PATTERN = '/^[-+]?(\d+(\.\d*)?|\.\d+)\z/';
 
     /**
-     * @internal
-     */
-    const MAX_FRACTION = 20;
-
-    /**
      * Currency fractions
      *
      * @var array
@@ -971,32 +966,25 @@ class Money implements MoneyInterface
      */
     private static function normalizeFraction($fraction)
     {
-        if (!self::isIntegralFraction($fraction)) {
-            $shown = is_scalar($fraction) || $fraction === null ? var_export($fraction, true) : gettype($fraction);
-            throw new MoneyException('Fraction must be an integer: ' . self::escapeForMessage($shown));
+        if ($fraction === null || is_bool($fraction)) {
+            return (int)$fraction;
         }
-        if ($fraction < 0) {
-            throw new MoneyException('Fraction must not be negative: ' . $fraction);
+        if (is_float($fraction) && !is_finite($fraction)) {
+            throw new MoneyException('Fraction must be finite: ' . $fraction);
         }
-        if ($fraction > self::MAX_FRACTION) {
-            throw new MoneyException(
-                sprintf('Fraction must not be greater than %d: %s', self::MAX_FRACTION, $fraction)
-            );
+        if (!is_int($fraction) && !is_float($fraction) && !(is_string($fraction) && is_numeric(trim($fraction)))) {
+            $shown = is_scalar($fraction) ? var_export($fraction, true) : gettype($fraction);
+            throw new MoneyException('Fraction must be a number: ' . self::escapeForMessage($shown));
+        }
+        $number = is_string($fraction) ? trim($fraction) + 0 : $fraction;
+        if ($number < 0) {
+            throw new MoneyException('Fraction must not be negative: ' . self::escapeForMessage($fraction));
+        }
+        if (is_float($number) && $number >= (float)PHP_INT_MAX) {
+            throw new MoneyException('Fraction is out of range: ' . self::escapeForMessage($fraction));
         }
 
-        return (int)$fraction;
-    }
-
-    /**
-     * @param mixed $fraction
-     *
-     * @return bool
-     */
-    private static function isIntegralFraction($fraction)
-    {
-        return is_int($fraction)
-            || (is_string($fraction) && preg_match(self::INTEGER_PATTERN, $fraction) === 1)
-            || (is_float($fraction) && is_finite($fraction) && floor($fraction) === $fraction);
+        return (int)$number;
     }
 
     /**
@@ -1059,11 +1047,13 @@ class Money implements MoneyInterface
     }
 
     /**
+     * @internal
+     *
      * @param mixed $value
      *
      * @return mixed
      */
-    private static function castStringable($value)
+    public static function castStringable($value)
     {
         return is_object($value) && method_exists($value, '__toString') ? (string)$value : $value;
     }
