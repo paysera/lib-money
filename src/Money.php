@@ -1005,7 +1005,12 @@ class Money implements MoneyInterface
             if (!is_finite($operand)) {
                 throw new MoneyException(sprintf('Invalid %s: %s', $name, var_export($operand, true)));
             }
-            return self::floatToDecimalString($operand);
+            $decimal = self::floatToDecimalString($operand);
+            if (stripos((string)$operand, 'e') !== false && (float)$decimal !== $operand) {
+                throw new MoneyException(sprintf('Invalid %s: %s', $name, var_export($operand, true)));
+            }
+
+            return $decimal;
         }
         $isScalar = is_scalar($operand);
         if (!$isScalar || !preg_match(self::OPERAND_PATTERN, (string)$operand)) {
@@ -1026,10 +1031,11 @@ class Money implements MoneyInterface
      */
     private static function floatToDecimalString($value)
     {
-        if ($value === 0.0) {
-            return '0';
+        $printed = str_replace(',', '.', (string)abs($value));
+        if (stripos($printed, 'e') === false) {
+            return ($value < 0 ? '-' : '') . $printed;
         }
-        list($mantissa, $exponent) = explode('e', str_replace(',', '.', sprintf('%.13e', abs($value))));
+        list($mantissa, $exponent) = explode('e', strtolower($printed));
         $digits = str_replace('.', '', $mantissa);
         $point = (int)$exponent + 1;
         if ($point <= 0) {

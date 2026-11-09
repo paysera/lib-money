@@ -1338,7 +1338,89 @@ class MoneyTest extends TestCase
             'more than fourteen significant digits' => [123456789.123456789, '123456789.12346'],
             'float of at least 1e14' => [1.0E+15, '1000000000000000'],
             'power of ten not exact in binary' => [1.0E+23, '100000000000000000000000'],
-            'large float with a fraction of digits' => [1.2345678901234567E+25, '12345678901235000000000000'],
+        ];
+    }
+
+    /**
+     * @dataProvider floatThatLosesDigitsProvider
+     */
+    public function testMulAndDivRejectAFloatInScientificNotationThatLosesDigits(
+        string $method,
+        float $operand,
+        string $message
+    ) {
+        $this->expectException(MoneyException::class);
+        $this->expectExceptionMessage($message);
+
+        (new Money('10', 'EUR'))->$method($operand);
+    }
+
+    /**
+     * @return array[]
+     */
+    public function floatThatLosesDigitsProvider()
+    {
+        return [
+            'multiplier with fifteen significant digits' => [
+                'mul',
+                123456789012345.0,
+                'Invalid multiplier: 12345678901234',
+            ],
+            'divisor with fifteen significant digits' => ['div', 123456789012345.0, 'Invalid divisor: 12345678901234'],
+            'large multiplier with a fraction of digits' => [
+                'mul',
+                1.2345678901234567E+25,
+                'Invalid multiplier: 1.23456789012345',
+            ],
+            'smallest normal divisor' => ['div', 2.2250738585072014E-308, 'Invalid divisor: 2.225073858507201'],
+            'multiplier printed as 1.0E+14' => ['mul', 99999999999999.98, 'Invalid multiplier: 99999999999999.9'],
+        ];
+    }
+
+    /**
+     * @dataProvider precisionSettingProvider
+     */
+    public function testMulUsesTheDigitsOfThePrecisionSetting(string $precision, float $multiplier, string $expected)
+    {
+        if ($precision === '-1' && PHP_VERSION_ID < 70100) {
+            $this->markTestSkipped('precision=-1 needs PHP 7.1 or later');
+        }
+        $previousPrecision = ini_get('precision');
+        ini_set('precision', $precision);
+
+        try {
+            $this->assertSame($expected, (new Money('10', 'EUR'))->mul($multiplier)->getAmount());
+        } finally {
+            ini_set('precision', $previousPrecision);
+        }
+    }
+
+    /**
+     * @return array[]
+     */
+    public function precisionSettingProvider()
+    {
+        return [
+            'fourteen digits' => ['14', 12345678901234.5, '123456789012340.000000'],
+            'seventeen digits' => ['17', 12345678901234.5, '123456789012345.000000'],
+            'shortest exact form' => ['-1', 12345678901234.5, '123456789012345.000000'],
+            'seventeen digits, fifteen-digit float' => ['17', 123456789012345.0, '1234567890123450.000000'],
+            'shortest exact form, fifteen-digit float' => ['-1', 123456789012345.0, '1234567890123450.000000'],
+            'shortest exact form, binary noise' => ['-1', 0.1 + 0.2, '3.000000'],
+            'just below 1e-4, printed as 0.0001' => ['14', 9.999999999999991E-5, '0.001000'],
+            'fifteen digits, fifteen-digit fraction' => ['15', 271349031604523.34, '2713490316045230.000000'],
+            'sixteen digits' => ['16', 12345678901234.5, '123456789012345.000000'],
+            'one digit, below 1e-4' => ['1', 9.811861780384492E-5, '0.001000'],
+            'sixty digits' => [
+                '60',
+                1.0E+60,
+                '9999999999999999493871352970740188669636450110134100730839040.000000',
+            ],
+            'fifty-four digits' => [
+                '54',
+                9.999999999999999E+53,
+                '9999999999999999081503569441270121106180565840020111360.000000',
+            ],
         ];
     }
 
@@ -1366,7 +1448,6 @@ class MoneyTest extends TestCase
         return [
             'below the sprintf precision limit' => [1.0E-40],
             'far below the sprintf precision limit' => [1.0E-60],
-            'smallest normal float' => [2.2250738585072014E-308],
             'subnormal float' => [5.0E-324],
         ];
     }
@@ -1526,6 +1607,7 @@ class MoneyTest extends TestCase
             'empty string' => ['', "Fraction must be a number: ''"],
             'hexadecimal string' => ['0x2', "Fraction must be a number: '0x2'"],
             'text' => ['two', "Fraction must be a number: 'two'"],
+            'string that only starts with a number' => ['2abc', "Fraction must be a number: '2abc'"],
             'array' => [[2], 'Fraction must be a number: array'],
             'stringable object' => [new StringableOperand('2'), 'Fraction must be a number: object'],
         ];
@@ -1566,6 +1648,9 @@ class MoneyTest extends TestCase
             'negative zero float' => ['1234', 'JPY', -0.0, '1234'],
             'null' => ['1234', 'JPY', null, '1234'],
             'false' => ['1234', 'JPY', false, '1234'],
+            'fraction between zero and one' => ['1234', 'EUR', 0.5, '1234'],
+            'fraction between zero and one as a string' => ['1234', 'EUR', '0.5', '1234'],
+            'fraction just below one' => ['1234', 'EUR', 0.9, '1234'],
             'string with a leading zero' => ['1234', 'EUR', '02', '12.34'],
             'fraction longer than the amount' => ['5', 'EUR', 3, '0.005'],
             'fraction above twenty' => ['1', 'EUR', 21, '0.000000000000000000001'],
