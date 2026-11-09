@@ -1335,6 +1335,9 @@ class MoneyTest extends TestCase
             'negative float below 1e-4' => [-0.000035, '-0.000035'],
             'negative power of ten below 1e-4' => [-1.0E-5, '-0.00001'],
             'very small float' => [1.0E-12, '0.000000000001'],
+            'rate below 1e-4 with binary noise' => [0.0035 / 100, '0.000035'],
+            'product below 1e-4 with binary noise' => [0.00001 * 3, '0.00003'],
+            'smallest normal float' => [2.2250738585072014E-308, '0.' . str_repeat('0', 307) . '22250738585072'],
             'more than fourteen significant digits' => [123456789.123456789, '123456789.12346'],
             'float of at least 1e14' => [1.0E+15, '1000000000000000'],
             'power of ten not exact in binary' => [1.0E+23, '100000000000000000000000'],
@@ -1367,12 +1370,16 @@ class MoneyTest extends TestCase
                 'Invalid multiplier: 12345678901234',
             ],
             'divisor with fifteen significant digits' => ['div', 123456789012345.0, 'Invalid divisor: 12345678901234'],
+            'negative multiplier with fifteen significant digits' => [
+                'mul',
+                -123456789012345.0,
+                'Invalid multiplier: -12345678901234',
+            ],
             'large multiplier with a fraction of digits' => [
                 'mul',
                 1.2345678901234567E+25,
                 'Invalid multiplier: 1.23456789012345',
             ],
-            'smallest normal divisor' => ['div', 2.2250738585072014E-308, 'Invalid divisor: 2.225073858507201'],
             'multiplier printed as 1.0E+14' => ['mul', 99999999999999.98, 'Invalid multiplier: 99999999999999.9'],
         ];
     }

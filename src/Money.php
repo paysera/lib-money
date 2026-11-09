@@ -830,7 +830,7 @@ class Money implements MoneyInterface
      *
      * @param string $amount
      * @param string $currency
-     * @param int|string|float $fraction
+     * @param int|string|float|bool|null $fraction
      *
      * @return static
      *
@@ -1006,7 +1006,7 @@ class Money implements MoneyInterface
                 throw new MoneyException(sprintf('Invalid %s: %s', $name, var_export($operand, true)));
             }
             $decimal = self::floatToDecimalString($operand);
-            if (stripos((string)$operand, 'e') !== false && (float)$decimal !== $operand) {
+            if (abs($operand) >= 1 && stripos((string)$operand, 'e') !== false && (float)$decimal !== $operand) {
                 throw new MoneyException(sprintf('Invalid %s: %s', $name, var_export($operand, true)));
             }
 
