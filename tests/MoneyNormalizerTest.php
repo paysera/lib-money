@@ -69,6 +69,7 @@ class MoneyNormalizerTest extends TestCase
             'no amount' => [['currency' => 'EUR'], 'Amount is not set'],
             'no currency' => [['amount' => '1'], 'Currency is not set'],
             'not a number' => [['amount' => '1.2.3', 'currency' => 'EUR'], 'Invalid amount specified'],
+            'trailing line ending' => [['amount' => "12.34\n", 'currency' => 'EUR'], 'Invalid amount specified'],
             'unknown currency, reported as an invalid amount' => [
                 ['amount' => '1', 'currency' => 'ZZZ'],
                 'Invalid amount specified',
@@ -148,6 +149,8 @@ class MoneyNormalizerTest extends TestCase
                 'EUR',
                 'Invalid amount specified',
             ],
+            'cents with a line ending' => ['mapFromCents', "1050\n", 'EUR', 'Invalid amount specified'],
+            'minor units with a line ending' => ['mapFromMinorUnits', "1050\n", 'EUR', 'Invalid amount specified'],
         ];
     }
 

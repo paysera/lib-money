@@ -9,6 +9,31 @@ class Money implements MoneyInterface
     const DEFAULT_SCALE = 6;
 
     /**
+     * @internal
+     */
+    const INTEGER_PATTERN = '/^-?\d+\z/';
+
+    /**
+     * @internal
+     */
+    const SIGNED_INTEGER_PATTERN = '/^[-+]?\d+\z/';
+
+    /**
+     * @internal
+     */
+    const SIGNED_DECIMAL_PATTERN = '/^[-+]?\d+(\.\d+)?\z/';
+
+    /**
+     * @internal
+     */
+    const DECIMAL_PATTERN = '/^-?\d+(\.\d+)?\z/';
+
+    /**
+     * @internal
+     */
+    const OPERAND_PATTERN = '/^[-+]?(\d+(\.\d*)?|\.\d+)\z/';
+
+    /**
      * Currency fractions
      *
      * @var array
@@ -227,11 +252,11 @@ class Money implements MoneyInterface
         } else {
             $amount = str_replace(',', '.', $amount);
             if (substr_count($amount, '.') > 1) {
-                throw new MoneyException('Invalid amount: ' . $amount);
+                throw new MoneyException('Invalid amount: ' . self::escapeForMessage($amount));
             }
 
-            if (!preg_match('/^[-+]?\d+(\.\d+)?$/', $amount)) {
-                throw new MoneyException('Amount has invalid chars: ' . $amount);
+            if (!preg_match(self::SIGNED_DECIMAL_PATTERN, $amount)) {
+                throw new MoneyException('Amount has invalid chars: ' . self::escapeForMessage($amount));
             }
 
             $amount = preg_replace('/^([-+]?)0+(\d)/', '$1$2', $amount);
@@ -260,7 +285,7 @@ class Money implements MoneyInterface
      */
     protected function setAmountInCents($amountInCents)
     {
-        if (!preg_match('/^-?\d+$/', $amountInCents)) {
+        if (!preg_match(self::INTEGER_PATTERN, $amountInCents)) {
             throw new MoneyException('Amount must be integer');
         }
 
@@ -309,7 +334,7 @@ class Money implements MoneyInterface
      */
     protected function setAmountInMinorUnits($amountInMinorUnits = null, $currency = null)
     {
-        if (!preg_match('/^-?\d+$/', $amountInMinorUnits)) {
+        if (!preg_match(self::INTEGER_PATTERN, $amountInMinorUnits)) {
             throw new MoneyException('Amount must be integer');
         }
         $fraction = static::getFraction($currency);
@@ -399,7 +424,7 @@ class Money implements MoneyInterface
         $currency = strtoupper($currency);
 
         if (!isset(static::$fractions[$currency])) {
-            throw new MoneyException(sprintf('Unsupported currency: %s', $currency));
+            throw new MoneyException(sprintf('Unsupported currency: %s', self::escapeForMessage($currency)));
         }
 
         $this->currency = $currency;
@@ -463,19 +488,23 @@ class Money implements MoneyInterface
     /**
      * Mul money
      *
-     * @param string|int $multiplier
+     * @param string|int|float|bool|object|null $multiplier
      *
      * @return static
+     *
+     * @throws MoneyException
      */
     public function mul($multiplier)
     {
+        $multiplier = self::normalizeOperand($multiplier, 'multiplier');
+
         return new static($this->getMath()->mul($this->getAmount(), $multiplier), $this->getCurrency());
     }
 
     /**
      * Div money
      *
-     * @param string|int $divisor
+     * @param string|int|float|bool|object|null $divisor
      *
      * @return static
      *
@@ -483,6 +512,7 @@ class Money implements MoneyInterface
      */
     public function div($divisor)
     {
+        $divisor = self::normalizeOperand($divisor, 'divisor');
         if ($divisor == '0') {
             throw new MoneyException('Division by zero');
         }
@@ -790,7 +820,7 @@ class Money implements MoneyInterface
     {
         $currency = strtoupper($currency);
         if (!isset(static::$fractions[$currency])) {
-            throw new MoneyException(sprintf('Unsupported currency: %s', $currency));
+            throw new MoneyException(sprintf('Unsupported currency: %s', self::escapeForMessage($currency)));
         }
         return static::$fractions[$currency];
     }
@@ -800,33 +830,32 @@ class Money implements MoneyInterface
      *
      * @param string $amount
      * @param string $currency
-     * @param integer $fraction
+     * @param int|string|float|bool|null $fraction
      *
      * @return static
+     *
+     * @throws MoneyException
      */
     static public function createFromNoDelimiterAmount($amount, $currency, $fraction = 2)
     {
         $amount = (string)$amount;
-        if ($amount === '') {
-            $amount = '0';
+        if ($amount !== '' && !preg_match(self::SIGNED_INTEGER_PATTERN, $amount)) {
+            throw new MoneyException('Invalid amount without delimiter: ' . self::escapeForMessage($amount));
         }
-        if ($amount[0] === '-') {
-            $minus = true;
-            $amount = substr($amount, 1);
+        $fraction = self::normalizeFraction($fraction);
+        $sign = $amount !== '' && $amount[0] === '-' ? '-' : '';
+        $amount = ltrim($amount, '-+');
+        if ($fraction > 0) {
+            $digits = str_split(str_repeat('0', $fraction) . $amount);
+            $left = implode('', array_slice($digits, 0, -$fraction));
+            $right = '.' . implode('', array_slice($digits, -$fraction));
         } else {
-            $minus = false;
+            $left = $amount;
+            $right = '';
         }
-        $amount = str_repeat('0', $fraction) . $amount;
-        $amountArray = str_split($amount);
-        $left = array_slice($amountArray, 0, -$fraction);
-        $right = array_slice($amountArray, -$fraction);
-        $left = ltrim(implode('', $left), '0');
+        $left = ltrim($left, '0');
         $left = $left === '' ? '0' : $left;
-        $amount = $left . '.' . implode('', $right);
-        if ($minus) {
-            $amount = '-' . $amount;
-        }
-        return new static($amount, $currency);
+        return new static($sign . $left . $right, $currency);
     }
 
     /**
@@ -926,6 +955,123 @@ class Money implements MoneyInterface
         }
 
         return (implode('', $array) . $end);
+    }
+
+    /**
+     * @param mixed $fraction
+     *
+     * @return int
+     *
+     * @throws MoneyException
+     */
+    private static function normalizeFraction($fraction)
+    {
+        if ($fraction === null || is_bool($fraction)) {
+            return (int)$fraction;
+        }
+        if (is_float($fraction) && !is_finite($fraction)) {
+            throw new MoneyException('Fraction must be finite: ' . $fraction);
+        }
+        if (!is_int($fraction) && !is_float($fraction) && !(is_string($fraction) && is_numeric(trim($fraction)))) {
+            $shown = is_scalar($fraction) ? var_export($fraction, true) : gettype($fraction);
+            throw new MoneyException('Fraction must be a number: ' . self::escapeForMessage($shown));
+        }
+        $number = is_string($fraction) ? trim($fraction) + 0 : $fraction;
+        if ($number < 0) {
+            throw new MoneyException('Fraction must not be negative: ' . self::escapeForMessage($fraction));
+        }
+        if (is_float($number) && $number >= (float)PHP_INT_MAX) {
+            throw new MoneyException('Fraction is out of range: ' . self::escapeForMessage($fraction));
+        }
+
+        return (int)$number;
+    }
+
+    /**
+     * @param mixed $operand
+     * @param string $name
+     *
+     * @return string
+     *
+     * @throws MoneyException
+     */
+    private static function normalizeOperand($operand, $name)
+    {
+        $operand = self::castStringable($operand);
+        if (in_array($operand, [null, false, ''], true)) {
+            return '0';
+        }
+        if (is_float($operand)) {
+            if (!is_finite($operand)) {
+                throw new MoneyException(sprintf('Invalid %s: %s', $name, var_export($operand, true)));
+            }
+            $decimal = self::floatToDecimalString($operand);
+            if (abs($operand) >= 1 && stripos((string)$operand, 'e') !== false && (float)$decimal !== $operand) {
+                throw new MoneyException(sprintf('Invalid %s: %s', $name, var_export($operand, true)));
+            }
+
+            return $decimal;
+        }
+        $isScalar = is_scalar($operand);
+        if (!$isScalar || !preg_match(self::OPERAND_PATTERN, (string)$operand)) {
+            throw new MoneyException(sprintf(
+                'Invalid %s: %s',
+                $name,
+                self::escapeForMessage($isScalar ? $operand : gettype($operand))
+            ));
+        }
+
+        return (string)$operand;
+    }
+
+    /**
+     * @param float $value
+     *
+     * @return string
+     */
+    private static function floatToDecimalString($value)
+    {
+        $printed = str_replace(',', '.', (string)abs($value));
+        if (stripos($printed, 'e') === false) {
+            return ($value < 0 ? '-' : '') . $printed;
+        }
+        list($mantissa, $exponent) = explode('e', strtolower($printed));
+        $digits = str_replace('.', '', $mantissa);
+        $point = (int)$exponent + 1;
+        if ($point <= 0) {
+            $decimal = '0.' . str_repeat('0', -$point) . $digits;
+        } elseif ($point >= strlen($digits)) {
+            $decimal = $digits . str_repeat('0', $point - strlen($digits));
+        } else {
+            $decimal = substr($digits, 0, $point) . '.' . substr($digits, $point);
+        }
+        if (strpos($decimal, '.') !== false) {
+            $decimal = rtrim(rtrim($decimal, '0'), '.');
+        }
+
+        return ($value < 0 ? '-' : '') . $decimal;
+    }
+
+    /**
+     * @internal
+     *
+     * @param mixed $value
+     *
+     * @return mixed
+     */
+    public static function castStringable($value)
+    {
+        return is_object($value) && method_exists($value, '__toString') ? (string)$value : $value;
+    }
+
+    /**
+     * @param mixed $value
+     *
+     * @return string
+     */
+    private static function escapeForMessage($value)
+    {
+        return addcslashes((string)$value, "\0..\37\177\\");
     }
 
     /**
